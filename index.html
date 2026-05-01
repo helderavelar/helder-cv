@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Currículo Organizado</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="curriculo">
+
+<div class="language-container">
+    <span class="label-text">PT</span>
+    <label class="switch">
+        <input type="checkbox" id="lang-checkbox" onchange="toggleLanguage()">
+        <span class="slider round"></span>
+    </label>
+    <span class="label-text">EN</span>
+</div>
+<button id="lang-toggle" onclick="toggleLanguage()">Português / English</button>
+
+<header>
+    <h1>Helder Henrique Avelar</h1>
+    <p class="contato">Braga, Portugal | h2avelar@gmail.com | +351 912 406 557</p>
+    <p class="contato lang-pt">Engenheiro de Design Digital | Projetos de Sinais Mistos</p>
+    <p class="contato lang-en" style="display:none;">Digital Design Engineer | Mixed-Signal Projects</p>
+</header>
+
+<main>
+    <section>
+        <h2 class="lang-pt">Resumo Profissional</h2>
+        <h2 class="lang-en" style="display:none;">Professional Summary</h2>
+        <p class="lang-pt">Engenheiro de Design Digital com vasta experiência em fluxo digital Cadence, design RTL em Verilog e verificação física. Especialista em projetos de sinais mistos em tecnologias de 180nm e 28nm.</p>
+        <p class="lang-en" style="display:none;">Digital Design Engineer with extensive experience in Cadence digital flow, Verilog RTL design, and physical verification. Specialist in mixed-signal projects in 180nm and 28nm technologies.</p>
+    </section>
+
+    <section>
+        <h2 class="lang-pt">Experiência Profissional</h2>
+        <h2 class="lang-en" style="display:none;">Work Experience</h2>
+        
+        <div class="item-experiencia">
+            <span class="cargo lang-pt">Engenheiro de Integração de Sistemas | INL</span>
+            <span class="cargo lang-en" style="display:none;">Application & System Integration Engineer | INL</span>
+            <span class="periodo">Ago 2023 – Atual</span>
+            <p class="lang-pt">Design de IC CMOS Digital para sinais mistos, do RTL ao Sign-off físico (Synthesis, Floorplan, CTS, STA, DRC/LVS).</p>
+            <p class="lang-en" style="display:none;">Digital CMOS SOC IC Designer for mixed-signal projects, from RTL to physical Sign-off (Synthesis, Floorplan, CTS, STA, DRC/LVS).</p>
+        </div>
+
+        <div class="item-experiencia">
+            <span class="cargo lang-pt">Assistente Convidado | FEUP</span>
+            <span class="cargo lang-en" style="display:none;">Invited Assistant Teaching | FEUP</span>
+            <span class="periodo">Set 2019 – Ago 2023</span>
+            <p class="lang-pt">Lecionação de Arquitetura de Computadores (ARMv8, RISC-V) e Projetos VLSI utilizando Cadence Virtuoso e Innovus.</p>
+            <p class="lang-en" style="display:none;">Teaching Computer Architecture (ARMv8, RISC-V) and VLSI Projects using Cadence Virtuoso and Innovus.</p>
+        </div>
+    </section>
+
+    <section>
+        <h2 class="lang-pt">Formação Acadêmica</h2>
+        <h2 class="lang-en" style="display:none;">Education</h2>
+        <div class="item-experiencia">
+            <span class="cargo lang-pt">Mestrado em Engenharia de Computação | UFRGS</span>
+            <span class="cargo lang-en" style="display:none;">M.Sc. in Computer Engineering | UFRGS</span>
+            <p class="lang-pt">Foco em Microeletrônica e Arquitetura de Computadores.</p>
+            <p class="lang-en" style="display:none;">Focus on Microelectronics and Computer Architecture.</p>
+        </div>
+    </section>
+
+    <section>
+        <h2 class="lang-pt">Certificações e Bolsas</h2>
+        <h2 class="lang-en" style="display:none;">Certifications & Grants</h2>
+        <ul>
+            <li class="lang-pt">Treinamento IC Brazil - Design de Circuitos Integrados (2016-2017)</li>
+            <li class="lang-en" style="display:none;">IC Brazil Training - Integrated Circuit Design Program (2016-2017)</li>
+            <li class="lang-pt">Bolsista de Investigação - INESC TEC Porto (2018-2019)</li>
+            <li class="lang-en" style="display:none;">Research Grantee - INESC TEC Porto (2018-2019)</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2 class="lang-pt">Habilidades Técnicas</h2>
+        <h2 class="lang-en" style="display:none;">Technical Skills</h2>
+        <ul class="habilidades-tags">
+            <li>Verilog / SystemVerilog</li>
+            <li>Cadence Genus & Innovus</li>
+            <li>RTL Synthesis & STA</li>
+            <li>Python / C / MATLAB</li>
+            <li>RISC-V & FPGA</li>
+        </ul>
+    </section>
+</main>
+    </section>
+
+
+</main>
+    </div>
+<script>
+function toggleLanguage() {
+    const ptElements = document.querySelectorAll('.lang-pt');
+    const enElements = document.querySelectorAll('.lang-en');
+    
+    ptElements.forEach(el => {
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    });
+    
+    enElements.forEach(el => {
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    });
+}
+</script>
+</body>
+</html>
