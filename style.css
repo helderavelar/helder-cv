@@ -1,9 +1,9 @@
 /* Aviso: Cores vibrantes detectadas. Use com cautela para não ofuscar o recrutador. */
 
 :root {
-    --primaria: #6c5ce7; /* Um roxo para dar profundidade ao seu desespero */
+    --primaria: #6c5ce7;
     --secundaria: #a29bfe;
-    --detalhe: #00cec9; /* Um ciano para fingir frescor e inovação */
+    --detalhe: #00cec9;
     --fundo: #f0f2f5;
     --texto: #2d3436;
 }
@@ -117,4 +117,42 @@ h2 {
 
 #lang-toggle:hover {
     background-color: var(--primaria);
+}
+
+/* NAVBAR custom */
+    .navbar-brand img {
+      height: 44px;
+      width: auto;
+      margin-right: 10px;
+      border-radius: 12px;
+    }
+
+    .navbar {
+      background-color: #6c5ce7;
+    }
+
+
+footer p {
+        color: white;
+    }
+
+#btnTopo {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+#btnTopo:hover {
+    background-color: #6c5ce7;;
 }

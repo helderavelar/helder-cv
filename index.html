@@ -3,39 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Helder Avelar Curriculum Vitae</title>
+    <title>Helder Avelar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+
     <div class="curriculo">
 
-<div class="language-container">
-    <span class="label-text">PT</span>
-    <label class="switch">
-        <input type="checkbox" id="lang-checkbox" onchange="toggleLanguage()">
-        <span class="slider round"></span>
-    </label>
-    <span class="label-text">EN</span>
-</div>
-<button id="lang-toggle" onclick="toggleLanguage()">Português / English</button>
 
 <header>
-    <h1>Helder Henrique Avelar</h1>
+    <h1></h1>
+    <h1>Helder Avelar</h1>
     <p class="contato">Braga, Portugal | ***@gmail.com | +351 ***</p>
     <p class="contato lang-pt">Engenheiro de Design Digital | Projetos de Sinais Mistos</p>
     <p class="contato lang-en" style="display:none;">Digital Design Engineer | Mixed-Signal Projects</p>
+
 </header>
 
+        <!--Menu de navegação-->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container">
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuNavbar" aria-controls="menuNavbar" aria-label="Alternar navegação">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="menuNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="#summary">Summary</a></li>
+          <li class="nav-item"><a class="nav-link" href="#experience">Experience</a></li>
+          <li class="nav-item"><a class="nav-link" href="#education">Education</a></li>
+          <li class="nav-item"><a class="nav-link" href="#certifications">Certifications</a></li>
+          <li class="nav-item"><a class="nav-link" href="#skills">Skills</a></li>
+          <li class="nav-item">
+          <button id="lang-toggle" onclick="toggleLanguage()">
+        PT <img src="img/br.webp" width="20" alt="BR"/> | <img src="img/en.webp" width="22" alt="UK"/> EN
+        </button>
+        </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+
 <main>
-    <section>
+    <section id="summary">
         <h2 class="lang-pt">Resumo Profissional</h2>
         <h2 class="lang-en" style="display:none;">Professional Summary</h2>
         <p class="lang-pt">Engenheiro de Design Digital com vasta experiência em fluxo digital Cadence, design RTL em Verilog e verificação física. Especialista em projetos de sinais mistos em tecnologias de 180nm e 28nm.</p>
         <p class="lang-en" style="display:none;">Digital Design Engineer with extensive experience in Cadence digital flow, Verilog RTL design, and physical verification. Specialist in mixed-signal projects in 180nm and 28nm technologies.</p>
     </section>
 
-    <section>
+    <section id="experience">
         <h2 class="lang-pt">Experiência Profissional</h2>
         <h2 class="lang-en" style="display:none;">Work Experience</h2>
         
@@ -56,7 +78,7 @@
         </div>
     </section>
 
-    <section>
+    <section id="education">
         <h2 class="lang-pt">Formação Acadêmica</h2>
         <h2 class="lang-en" style="display:none;">Education</h2>
         <div class="item-experiencia">
@@ -67,7 +89,7 @@
         </div>
     </section>
 
-    <section>
+    <section id="certifications">
         <h2 class="lang-pt">Certificações e Bolsas</h2>
         <h2 class="lang-en" style="display:none;">Certifications & Grants</h2>
         <ul>
@@ -78,7 +100,7 @@
         </ul>
     </section>
 
-    <section>
+    <section id="skills">
         <h2 class="lang-pt">Habilidades Técnicas</h2>
         <h2 class="lang-en" style="display:none;">Technical Skills</h2>
         <ul class="habilidades-tags">
@@ -92,13 +114,15 @@
 </main>
     </section>
 
+<button id="btnTopo" title="Voltar ao topo">↑</button>
 
 </main>
     </div>
+    
 <script>
 function toggleLanguage() {
-    const ptElements = document.querySelectorAll('.lang-pt');
     const enElements = document.querySelectorAll('.lang-en');
+    const ptElements = document.querySelectorAll('.lang-pt');
     
     ptElements.forEach(el => {
         el.style.display = el.style.display === 'none' ? 'block' : 'none';
