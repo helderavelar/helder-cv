@@ -156,3 +156,41 @@ footer p {
 #btnTopo:hover {
     background-color: #6c5ce7;;
 }
+
+.tab-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+}
+
+.tab-link {
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+    font-weight: bold;
+    color: #555;
+    transition: 0.3s;
+}
+
+.tab-link:hover {
+    color: #000;
+}
+
+.tab-link.active {
+    border-bottom: 3px solid #007bff; /* Ou a cor do seu destaque */
+    color: #007bff;
+}
+
+.tab-content {
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
