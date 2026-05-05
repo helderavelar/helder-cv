@@ -49,3 +49,64 @@ body {
     box-shadow: 0 10px 30px rgba(0,0,0,0.05);
     text-align: center;
 }
+
+/* Container principal */
+.carousel-container {
+    position: relative;
+    max-width: 800px;
+    margin: 20px auto;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* Os itens do carrossel */
+.carousel-item {
+    display: none; /* Esconde todos por padrão */
+    width: 100%;
+}
+
+.carousel-item img {
+    width: 100%;
+    display: block;
+    height: auto;
+}
+
+/* Mostra apenas o ativo */
+.carousel-item.active {
+    display: block;
+    animation: fade 0.5s ease-in-out;
+}
+
+/* Legendas */
+.caption {
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 10px;
+    text-align: center;
+    font-size: 14px;
+}
+
+/* Botões */
+.prev, .next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.3);
+    color: white;
+    border: none;
+    padding: 15px;
+    cursor: pointer;
+    font-size: 20px;
+    transition: 0.3s;
+}
+
+.prev:hover, .next:hover { background: rgba(255,255,255,0.8); color: black; }
+.prev { left: 0; border-radius: 0 5px 5px 0; }
+.next { right: 0; border-radius: 5px 0 0 5px; }
+
+@keyframes fade {
+    from { opacity: 0.4; }
+    to { opacity: 1; }
+}
+
