@@ -41,7 +41,7 @@ async function openTab(evt, tabName) {
 
     try {
         // Busca o ficheiro correspondente (ex: cv-content.html)
-        const response = await fetch(`html/${tabName}-content.html`);
+        const response = await fetch(`${tabName}-content.html`);
         
         if (!response.ok) throw new Error("Ficheiro não encontrado. Mais uma falha.");
         
@@ -67,4 +67,13 @@ async function openTab(evt, tabName) {
 window.onload = () => {
     const firstTab = document.querySelector(".tab-link");
     if (firstTab) firstTab.click();
+};
+
+// No seu script.js, adicione isto para carregar a primeira aba por padrão
+window.onload = () => {
+    // Simula um clique no primeiro botão do menu assim que a página carrega
+    const firstTab = document.querySelector(".tab-link");
+    if (firstTab) {
+        firstTab.click();
+    }
 };
