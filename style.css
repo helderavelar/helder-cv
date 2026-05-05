@@ -159,22 +159,43 @@ footer p {
 
 .tab-container {
     display: flex;
-    justify-content: center;
-    gap: 10px;
+    justify-content: space-between; /* Distribui o espaço entre eles */
+    align-items: stretch;
+    gap: 5px;             /* Pequeno espaço entre os botões */
     margin-bottom: 20px;
     border-bottom: 1px solid #ccc;
-    padding-bottom: 10px;
+    width: 100%;          /* Garante que o menu ocupe a largura toda */
+    flex-wrap: nowrap;    /* PROIBIDO quebrar para a linha de baixo */
 }
 
 .tab-link {
+    flex: 1;              /* Faz com que os 3 botões tenham exatamente o mesmo tamanho */
     background: none;
     border: none;
-    padding: 10px 20px;
+    padding: 12px 5px;    /* Reduzi um pouco o padding lateral */
     cursor: pointer;
     font-family: 'Roboto', sans-serif;
     font-weight: bold;
     color: #555;
     transition: 0.3s;
+    
+    /* O segredo para não quebrar a linha: */
+    white-space: nowrap;  
+    text-align: center;
+    font-size: 14px;      /* Tamanho base */
+}
+
+.tab-link.active {
+    border-bottom: 3px solid #007bff;
+    color: #007bff;
+}
+
+/* Ajuste específico para telemóveis muito pequenos */
+@media (max-width: 400px) {
+    .tab-link {
+        font-size: 11px; /* Diminui a letra para caber em ecrãs minúsculos */
+        padding: 10px 2px;
+    }
 }
 
 .tab-link:hover {
