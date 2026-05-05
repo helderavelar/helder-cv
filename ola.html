@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Minha Esposa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/love-style.css">
+</head>
+<body>
+
+<header class="romantic-header">
+    <h1>Para alguém muito especial...</h1>
+    <p>Apesar do universo ser vasto e deprimente, você o torna suportável.</p>
+</header>
+
+<nav class="tab-container">
+    <button class="tab-link active" onclick="openTab(event, 'mensagem')">Nossa História</button>
+    <button class="tab-link" onclick="openTab(event, 'galeria')">Galeria</button>
+    <button class="tab-link" onclick="openTab(event, 'viagem')">Próxima Aventura</button>
+</nav>
+
+<main id="tab-container-alvo">
+    <!-- O conteúdo será injetado aqui via fetch -->
+</main>
+
+<script src="scripts/love-script.js"></script> 
+</body>
+</html>
