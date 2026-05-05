@@ -41,7 +41,7 @@ async function openTab(evt, tabName) {
 
     try {
         // Busca o ficheiro correspondente (ex: cv-content.html)
-        const response = await fetch(`${tabName}-content.html`);
+        const response = await fetch(`${tabName}.html`);
         
         if (!response.ok) throw new Error("Ficheiro não encontrado. Mais uma falha.");
         
