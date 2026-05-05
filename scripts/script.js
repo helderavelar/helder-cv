@@ -80,3 +80,23 @@ window.onload = () => {
         firstTab.click();
     }
 };
+
+let slideIndex = 0;
+
+function moveSlide(n) {
+    const slides = document.getElementsByClassName("carousel-item");
+    if (slides.length === 0) return; // Segurança contra o vazio
+
+    // Remove classe ativa do atual
+    slides[slideIndex].classList.remove("active");
+
+    // Calcula o próximo índice
+    slideIndex += n;
+
+    // Faz o loop (volta ao início ou vai ao fim)
+    if (slideIndex >= slides.length) { slideIndex = 0; }
+    if (slideIndex < 0) { slideIndex = slides.length - 1; }
+
+    // Adiciona classe ativa ao novo slide
+    slides[slideIndex].classList.add("active");
+}
