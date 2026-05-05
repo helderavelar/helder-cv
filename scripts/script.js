@@ -34,31 +34,34 @@ mybutton.onclick = function() {
 }
 
 async function openTab(evt, tabName) {
+    // CAPTURA o botão aqui, enquanto ele ainda existe na memória
+    const botaoClicado = evt.currentTarget; 
     const container = document.getElementById("tab-container-alvo");
     
-    // Mostra um sinal de carregamento (opcional, se você quiser fingir que o computador está a pensar)
     container.innerHTML = "Carregando... não que a espera valha a pena.";
 
     try {
-        // Busca o ficheiro correspondente (ex: cv-content.html)
-        const response = await fetch(`${tabName}.html`);
+        const filePath = `html/${tabName}-content.html`;
+        console.log("Tentando carregar:", filePath);
+
+        const response = await fetch(filePath);
         
-        if (!response.ok) throw new Error("Ficheiro não encontrado. Mais uma falha.");
+        if (!response.ok) throw new Error("Ficheiro não encontrado.");
         
         const html = await response.text();
-        
-        // Insere o conteúdo no contentor
         container.innerHTML = html;
 
-        // Atualiza a classe ativa nos botões
+        // Agora usamos o 'botaoClicado' que guardámos antes do await
         const tabLinks = document.getElementsByClassName("tab-link");
         for (let i = 0; i < tabLinks.length; i++) {
             tabLinks[i].classList.remove("active");
         }
-        evt.currentTarget.classList.add("active");
+        
+        // Aqui o 'evt.currentTarget' seria null, mas 'botaoClicado' ainda vive!
+        botaoClicado.classList.add("active");
 
     } catch (error) {
-        container.innerHTML = "Erro ao carregar o conteúdo. O universo está contra nós.";
+        container.innerHTML = "Erro ao carregar o conteúdo. O universo é hostil.";
         console.error(error);
     }
 }
