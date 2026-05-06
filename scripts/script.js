@@ -44,7 +44,9 @@ async function openTab(evt, tabName) {
         const filePath = `html/${tabName}-content.html`;
         console.log("Tentando carregar:", filePath);
 
-        const response = await fetch(filePath);
+        const response = await fetch(filePath, {
+    cache: "no-store" // Diz ao navegador para não guardar nem ler do cache
+});
         
         if (!response.ok) throw new Error("Ficheiro não encontrado.");
         
