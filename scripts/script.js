@@ -44,7 +44,7 @@ async function openTab(evt, tabName) {
     const cacheBuster = new Date().getTime();
 
     try {
-//        const filePath = `html/${tabName}-content.html`;
+        const filePath = `html/${tabName}-content.html`;
         console.log("Tentando carregar:", filePath);
 
         const response = await fetch(`${tabName}-content.html?v=${cacheBuster}`, {
