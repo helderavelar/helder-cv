@@ -40,11 +40,16 @@ async function openTab(evt, tabName) {
     
     container.innerHTML = "Carregando... não que a espera valha a pena.";
 
-    try {
-        const filePath = `html/${tabName}-content.html`;
-        console.log("Tentando carregar:", filePath);
+    // Gerar um código único para cada requisição
+    const cacheBuster = new Date().getTime();
 
-        const response = await fetch(filePath);
+    try {
+//        const filePath = `html/${tabName}-content.html`;
+//        console.log("Tentando carregar:", filePath);
+
+        const response = await fetch(`${tabName}-content.html?v=${cacheBuster}`, {
+            cache: "no-store" 
+        });       
         
         if (!response.ok) throw new Error("Ficheiro não encontrado.");
         
