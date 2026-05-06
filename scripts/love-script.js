@@ -1,38 +1,3 @@
-function toggleLanguage() {
-    const enElements = document.querySelectorAll('.lang-en');
-    const ptElements = document.querySelectorAll('.lang-pt');
-    
-    ptElements.forEach(el => {
-        el.style.display = el.style.display === 'none' ? 'block' : 'none';
-    });
-    
-    enElements.forEach(el => {
-        el.style.display = el.style.display === 'none' ? 'block' : 'none';
-    });
-}
-
-// Pega o botão
-const mybutton = document.getElementById("btnTopo");
-
-// Quando o usuário rolar 20px para baixo, o botão aparece
-window.onscroll = function() {scrollFunction()};
-
-function scrollFunction() {
-  if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-    mybutton.style.display = "block";
-  } else {
-    mybutton.style.display = "none";
-  }
-}
-
-// Quando clicar no botão, volta para o topo
-mybutton.onclick = function() {
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth' // Faz a subida ser suave, em vez de um salto brusco
-  });
-}
-
 async function openTab(evt, tabName) {
     // CAPTURA o botão aqui, enquanto ele ainda existe na memória
     const botaoClicado = evt.currentTarget; 
@@ -42,14 +7,13 @@ async function openTab(evt, tabName) {
 
     try {
         const filePath = `html/${tabName}-content.html`;
-        console.log("Tentando carregar:", filePath);
-
         const response = await fetch(filePath);
         
         if (!response.ok) throw new Error("Ficheiro não encontrado.");
         
         const html = await response.text();
         container.innerHTML = html;
+
 
         // Agora usamos o 'botaoClicado' que guardámos antes do await
         const tabLinks = document.getElementsByClassName("tab-link");
@@ -62,15 +26,8 @@ async function openTab(evt, tabName) {
 
     } catch (error) {
         container.innerHTML = "Erro ao carregar o conteúdo. O universo é hostil.";
-        console.error(error);
-    }
+        console.error("Marvin: Um erro? Que novidade...", error);    }
 }
-
-// Carregar a aba inicial (CV) ao abrir a página
-window.onload = () => {
-    const firstTab = document.querySelector(".tab-link");
-    if (firstTab) firstTab.click();
-};
 
 // No seu script.js, adicione isto para carregar a primeira aba por padrão
 window.onload = () => {
@@ -80,6 +37,19 @@ window.onload = () => {
         firstTab.click();
     }
 };
+
+// 1. CARREGAMENTO INICIAL
+// Usamos uma função que tenta clicar na aba inicial até conseguir
+function carregarAbaInicial() {
+    const primeiraAba = document.querySelector(".tab-link");
+    if (primeiraAba) {
+        console.log("Marvin: A clicar na primeira aba para acabar com o vazio.");
+        primeiraAba.click();
+    } else {
+        // Se não encontrou, tenta de novo em 100ms (pode ser lentidão do DOM)
+        setTimeout(carregarAbaInicial, 100);
+    }
+}
 
 let slideIndex = 0;
 
@@ -100,3 +70,14 @@ function moveSlide(n) {
     // Adiciona classe ativa ao novo slide
     slides[slideIndex].classList.add("active");
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Procura o primeiro botão de aba disponível
+    const primeiraAba = document.querySelector(".tab-link");
+    if (primeiraAba) {
+        primeiraAba.click(); // Força o clique para carregar o conteúdo inicial
+    } else {
+        console.error("Não encontrei nenhum botão de aba. Que deserto.");
+    }
+});
+

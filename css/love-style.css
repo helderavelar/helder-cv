@@ -50,14 +50,16 @@ body {
     text-align: center;
 }
 
-/* Container principal */
+/* Container principal - Bordas mais arredondadas e sombra suave */
 .carousel-container {
     position: relative;
     max-width: 800px;
-    margin: 20px auto;
+    margin: 30px auto;
     overflow: hidden;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    border-radius: 25px; /* Bordas bem mais suaves */
+    box-shadow: 0 10px 30px rgba(255, 133, 161, 0.3); /* Sombra rosada */
+    border: 5px solid white; /* Moldura estilo fotografia antiga */
+    background-color: white;
 }
 
 /* Os itens do carrossel */
