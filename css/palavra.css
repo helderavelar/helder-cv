@@ -10,30 +10,32 @@
     --color-absent: #3a3a3c;    /* Cinza Escuro */
 }
 
-body {
+html, body {
     background-color: var(--bg-color);
     color: var(--text-color);
     font-family: 'Clear Sans', 'Helvetica Neue', Arial, sans-serif;
     margin: 0;
+    padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    /* Tranca a altura no limite exato da tela visível do celular */
+    height: 100dvh; 
     overflow: hidden;
 }
 
 #game-container {
     width: 100%;
-    max-width: 450px;
-    height: 100dvh;
+    max-width: 500px;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* Alinha do topo para baixo sem criar vácuos */
+    justify-content: space-between;
     align-items: center;
     padding: 10px;
+    /* Respeita a barra de navegação de iPhones e Androids modernos */
+    padding-bottom: calc(10px + env(safe-area-inset-bottom)); 
     box-sizing: border-box;
-    gap: 8px; /* Espaço fixo e seguro entre os elementos */
-    position: relative;
 }
 
 header h1 {
@@ -52,13 +54,12 @@ header h1 {
     display: grid;
     grid-template-rows: repeat(6, 1fr);
     grid-gap: 5px;
-    padding: 5px;
+    padding: 10px;
     width: 100%;
-    max-width: 310px; /* Ligeiramente mais estreito para manter a proporção */
+    max-width: 330px;
     height: 100%;
-    max-height: 320px; /* Reduzido para garantir que o teclado caiba na tela */
+    max-height: 350px; 
     box-sizing: border-box;
-    margin-bottom: auto; /* O truque de mestre para isolar o teclado na base */
 }
 
 .row {
@@ -92,17 +93,15 @@ header h1 {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    /* Proteção para barras de navegação do sistema do telemóvel */
-    padding-bottom: env(safe-area-inset-bottom, 15px); 
-    box-sizing: border-box;
+    grid-gap: 8px;
+    padding: 10px 0;
 }
 
 .keyboard-row {
     display: flex;
     justify-content: center;
     width: 100%;
-    gap: 4px;
+    grid-gap: 6px;
 }
 
 .key {
@@ -111,13 +110,13 @@ header h1 {
     border: 0;
     padding: 0;
     margin: 0;
-    height: 42px; /* Altura compacta e ultra segura para mobile */
+    height: 48px; /* Reduzido de 58px para economizar espaço valioso */
     flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
     font-weight: bold;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     border-radius: 4px;
     cursor: pointer;
     user-select: none;
@@ -148,23 +147,25 @@ header h1 {
 #message-container {
     background-color: #ffffff;
     color: #000000;
-    padding: 10px 15px;
+    padding: 12px 20px;
     border-radius: 4px;
     font-weight: bold;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     position: absolute;
-    top: 65px; /* Fixado logo abaixo do título do cabeçalho */
+    top: 12%;
     left: 50%;
     transform: translateX(-50%);
     z-index: 100;
     opacity: 0;
     transition: opacity 0.15s ease-in-out;
     pointer-events: none;
-    box-shadow: 0 4px 23px 0 rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 23px 0 rgba(0, 0, 0, 0.2);
     text-transform: uppercase;
-    width: 85%;
-    max-width: 350px;
-    text-align: center;
+    
+    /* AS MUDANÇAS ESTÃO AQUI: */
+    width: 85%;           /* Ocupa 85% da largura da tela */
+    max-width: 420px;     /* Mas não passa de 420px em telas grandes */
+    text-align: center;   /* Centraliza o texto horroroso lá dentro */
     box-sizing: border-box;
 }
 
