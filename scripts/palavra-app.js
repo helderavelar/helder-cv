@@ -90,49 +90,68 @@ function processarChute() {
     // Se passou pelas validações, vamos pintar os quadradinhos
     revelarCores(quadrados, palavraChutada);
 
-    // Checa a vitória
-    if (palavraChutada === palavraSecreta) {
-        mostrarMensagemFinal("Parabéns, você adivinhou. Uma vitória insignificante na escala cósmica, mas parabéns.");
-        linhaAtual = 6; // Bloqueia o jogo
-        return;
-    }
+    // Espera a animação dos quadradinhos terminar antes de julgar o destino do jogador
+    setTimeout(() => {
+        // Checa a vitória
+        if (palavraChutada === palavraSecreta) {
+            mostrarMensagemFinal("Parabéns, você adivinhou. Uma vitória insignificante na escala cósmica, mas parabéns.");
+            linhaAtual = 6; // Bloqueia o jogo
+            return;
+        }
 
-    // Avança para a próxima tentativa
-    linhaAtual++;
-    quadradoAtual = 0;
+        // Avança para a próxima tentativa
+        linhaAtual++;
+        quadradoAtual = 0;
 
-    // Checa a derrota
-    if (linhaAtual === 6) {
-        mostrarMensagemFinal(`Suas tentativas evaporaram. A palavra era: ${palavraSecreta}. Que lástima.`);
-    }
+        // Checa a derrota
+        if (linhaAtual === 6) {
+            mostrarMensagemFinal(`Suas tentativas evaporaram. A palavra era: ${palavraSecreta}. Que lástima.`);
+        }
+    }, 1700); // 1700ms é o tempo exato para o último quadrado terminar de girar
+
 }
 
 // 6. O Algoritmo Inteligente de Cores (Lida com letras duplicadas)
 function revelarCores(quadrados, palavraChutada) {
-    // Criamos uma cópia das letras da palavra secreta para rastrear o que já foi usado
     let letrasRestantes = palavraSecreta.split("");
+    
+    // Criamos uma lista para guardar qual cor cada quadrado vai receber
+    let coresDefinidas = Array(5).fill("absent");
 
-    // Primeiro Passo: Encontrar e pintar o que está CORRETO (Verde)
+    // Primeiro Passo: Mapear os VERDES (Posição exata)
     for (let i = 0; i < 5; i++) {
         if (palavraChutada[i] === palavraSecreta[i]) {
-            quadrados[i].classList.add("correct");
-            letrasRestantes[i] = null; // Remove para não contar duas vezes
+            coresDefinidas[i] = "correct";
+            letrasRestantes[i] = null;
         }
     }
 
-    // Segundo Passo: Encontrar o que está DESLOCADO (Amarelo) ou AUSENTE (Cinza)
+    // Segundo Passo: Mapear os AMARELOS (Posição errada)
     for (let i = 0; i < 5; i++) {
-        // Ignora os que já resolvemos no primeiro passo
-        if (quadrados[i].classList.contains("correct")) continue;
+        if (coresDefinidas[i] === "correct") continue;
 
         const indexNaSecreta = letrasRestantes.indexOf(palavraChutada[i]);
 
         if (indexNaSecreta !== -1) {
-            quadrados[i].classList.add("present"); // Amarelo
-            letrasRestantes[indexNaSecreta] = null; // Marca como usado
-        } else {
-            quadrados[i].classList.add("absent"); // Cinza
+            coresDefinidas[i] = "present";
+            letrasRestantes[indexNaSecreta] = null;
         }
+    }
+
+    // Terceiro Passo: Aplicar a animação em cascata (O show visual)
+    for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+            // Dispara a rotação do quadradinho
+            quadrados[i].classList.add("flip");
+            
+            // Truque de mágica: Exatamente aos 250ms (metade da animação),
+            // o quadrado está de perfil. É aí que injetamos a cor de fundo!
+            setTimeout(() => {
+                quadrados[i].classList.add(coresDefinidas[i]);
+                atualizarTeclaVirtual(palavraChutada[i], coresDefinidas[i]); // Atualiza a tecla do teclado virtual em sincronia!
+            }, 250);
+
+        }, i * 300); // Cada quadrado espera 300ms a mais que o anterior para começar
     }
 }
 
@@ -152,3 +171,29 @@ function mostrarMensagemFinal(texto) {
     container.textContent = texto;
     container.classList.add("show");
     }
+
+function atualizarTeclaVirtual(letra, novaCor) {
+    const botoes = document.querySelectorAll(".key");
+    let botaoAlvo = null;
+
+    // Procura qual botão corresponde à letra jogada
+    botoes.forEach(b => {
+        if (b.textContent === letra) {
+            botaoAlvo = b;
+        }
+    });
+
+    if (!botaoAlvo) return; // Se for uma tecla tipo ENTER ou DEL, ignora
+
+    // Regra hierárquica para não "rebaixar" a cor da tecla
+    if (botaoAlvo.classList.contains("correct")) {
+        return; // Se já está verde, não muda mais
+    }
+    if (botaoAlvo.classList.contains("present") && novaCor === "absent") {
+        return; // Se já está amarelo, não pode virar cinza
+    }
+
+    // Remove estados antigos menores e adiciona a nova cor
+    botaoAlvo.classList.remove("present", "absent");
+    botaoAlvo.classList.add(novaCor);
+}

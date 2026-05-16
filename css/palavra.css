@@ -34,49 +34,28 @@ body {
     box-sizing: border-box;
 }
 
-/* Diminuindo o topo */
 header h1 {
-    font-size: 2rem;      /* Reduzido de 2.5rem */
+    font-size: 2.5rem;
     font-weight: 700;
     letter-spacing: 0.2rem;
-    margin: 5px 0;        /* Espaçamento menor */
+    margin: 0 0 5px 0;
     border-bottom: 1px solid var(--border-empty);
     width: 100vw;
     text-align: center;
-    padding-bottom: 5px;  /* Reduzido de 10px */
+    padding-bottom: 5px;
 }
 
-/* Encolhendo a grade de 6x5 */
+/* A Grade mágica de 6x5 */
 #board {
     display: grid;
     grid-template-rows: repeat(6, 1fr);
     grid-gap: 5px;
-    padding: 5px;         /* Reduzido de 10px */
+    padding: 10px;
     width: 100%;
-    max-width: 330px;     /* Um tiquinho mais estreito */
+    max-width: 350px;
     height: 100%;
-    max-height: 350px;    /* Reduzido de 400px para empurrar o teclado para cima */
+    max-height: 400px; 
     box-sizing: border-box;
-}
-
-/* Deixando as teclas um pouco mais baixas por padrão */
-.key {
-    background-color: #818384;
-    color: var(--text-color);
-    border: 0;
-    padding: 0;
-    margin: 0;
-    height: 44px;         /* Reduzido de 48px */
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-    font-size: 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-    user-select: none;
-    text-transform: uppercase;
 }
 
 .row {
@@ -119,6 +98,25 @@ header h1 {
     justify-content: center;
     width: 100%;
     grid-gap: 6px;
+}
+
+.key {
+    background-color: #818384;
+    color: var(--text-color);
+    border: 0;
+    padding: 0;
+    margin: 0;
+    height: 48px; /* Reduzido de 58px para economizar espaço valioso */
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+    text-transform: uppercase;
 }
 
 /* O TRUQUE FINAL: Para telas muito pequenas (com menos de 700px de altura total) */
@@ -170,4 +168,31 @@ header h1 {
 /* Classe que o JavaScript vai injetar para mostrar o aviso */
 #message-container.show {
     opacity: 1;
+}
+
+/* Animação que gira o quadrado em 360 graus na vertical */
+@keyframes flipIn {
+    0% { transform: rotateX(0deg); }
+    45% { transform: rotateX(90deg); } /* Totalmente de perfil (invisível) */
+    55% { transform: rotateX(90deg); } /* Momento exato onde a cor vai mudar */
+    100% { transform: rotateX(0deg); } /* Volta a ficar de frente, mas com a cor nova */
+}
+
+/* Classe que o JavaScript vai injetar para disparar a animação */
+.tile.flip {
+    animation: flipIn 0.5s ease-in-out forwards;
+}
+
+/* Cores para as teclas do teclado conforme o progresso */
+.key.correct { 
+    background-color: var(--color-correct); 
+    color: #ffffff; 
+}
+.key.present { 
+    background-color: var(--color-present); 
+    color: #ffffff; 
+}
+.key.absent { 
+    background-color: var(--color-absent); 
+    color: #777777; /* Deixa o texto da letra meio apagado */
 }
