@@ -93,8 +93,8 @@ header h1 {
     width: 100%;
     display: flex;
     flex-direction: column;
-    grid-gap: 8px;
-    padding: 10px 0;
+    grid-gap: 6px;
+    padding: 5px 0;
 }
 
 .keyboard-row {

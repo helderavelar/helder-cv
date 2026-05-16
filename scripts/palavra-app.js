@@ -4,6 +4,11 @@ let quadradoAtual = 0;
 // Escolhe uma palavra secreta aleatória da nossa lista do palavras.js
 const palavraSecreta = palavrasSecretas[Math.floor(Math.random() * palavrasSecretas.length)];
 
+// FUNÇÃO AUXILIAR: Transforma "AÇÕES" em "ACOES" para checagens internas
+function limparTexto(texto) {
+    return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+}
+
 // Aguarda o HTML carregar completamente antes de começar a escutar os comandos
 document.addEventListener("DOMContentLoaded", () => {
     inicializarTecladoFisico();
@@ -82,18 +87,26 @@ function processarChute() {
     }
 
     // Validação 2: A palavra existe no nosso dicionário?
-    if (!todasAsPalavrasValidas.includes(palavraChutada)) {
+    // Buscamos no dicionário se existe alguma palavra que, sem acento, seja igual ao chute
+    const palavraOficial = todasAsPalavrasValidas.find(p => limparTexto(p) === palavraChutada);
+
+    if (!palavraOficial) {
         mostrarMensagem("Essa palavra não existe no meu banco de dados. Tente algo real.");
         return;
     }
 
+    // SUBSTUIÇÃO VISUAL: Se achou "AÇÕES", reescreve os quadradinhos com a acentuação correta!
+    for (let i = 0; i < 5; i++) {
+        quadrados[i].textContent = palavraOficial[i];
+    }
+
     // Se passou pelas validações, vamos pintar os quadradinhos
-    revelarCores(quadrados, palavraChutada);
+    revelarCores(quadrados, palavraOficial);
 
     // Espera a animação dos quadradinhos terminar antes de julgar o destino do jogador
     setTimeout(() => {
-        // Checa a vitória
-        if (palavraChutada === palavraSecreta) {
+        // Checa a vitória comparando as versões limpas
+        if (limparTexto(palavraOficial) === limparTexto(palavraSecreta)) {
             mostrarMensagemFinal("Parabéns, você adivinhou. Uma vitória insignificante na escala cósmica, mas parabéns.");
             linhaAtual = 6; // Bloqueia o jogo
             return;
@@ -113,24 +126,28 @@ function processarChute() {
 
 // 6. O Algoritmo Inteligente de Cores (Lida com letras duplicadas)
 function revelarCores(quadrados, palavraChutada) {
-    let letrasRestantes = palavraSecreta.split("");
+    // Para fins de comparação lógica e atualização do teclado, limpamos os acentos
+    let chuteLimpo = limparTexto(palavraChutada);
+    let secretaLimpa = limparTexto(palavraSecreta);
+    
+    let letrasRestantes = secretaLimpa.split("");
     
     // Criamos uma lista para guardar qual cor cada quadrado vai receber
     let coresDefinidas = Array(5).fill("absent");
 
-    // Primeiro Passo: Mapear os VERDES (Posição exata)
+    // Primeiro Passo: Mapear os VERDES (Posição exata usando as versões limpas)
     for (let i = 0; i < 5; i++) {
-        if (palavraChutada[i] === palavraSecreta[i]) {
+        if (chuteLimpo[i] === secretaLimpa[i]) {
             coresDefinidas[i] = "correct";
             letrasRestantes[i] = null;
         }
     }
 
-    // Segundo Passo: Mapear os AMARELOS (Posição errada)
+    // Segundo Passo: Mapear os AMARELOS (Posição errada usando as versões limpas)
     for (let i = 0; i < 5; i++) {
         if (coresDefinidas[i] === "correct") continue;
 
-        const indexNaSecreta = letrasRestantes.indexOf(palavraChutada[i]);
+        const indexNaSecreta = letrasRestantes.indexOf(chuteLimpo[i]);
 
         if (indexNaSecreta !== -1) {
             coresDefinidas[i] = "present";
@@ -138,17 +155,20 @@ function revelarCores(quadrados, palavraChutada) {
         }
     }
 
-    // Terceiro Passo: Aplicar a animação em cascata (O show visual)
+    // Terceiro Passo: Aplicar a animação em cascata (O seu show visual)
     for (let i = 0; i < 5; i++) {
         setTimeout(() => {
-            // Dispara a rotação do quadradinho
+            // Dispara a rotação do quadradinho (certifique-se de ter a classe .flip no CSS)
             quadrados[i].classList.add("flip");
             
             // Truque de mágica: Exatamente aos 250ms (metade da animação),
             // o quadrado está de perfil. É aí que injetamos a cor de fundo!
             setTimeout(() => {
                 quadrados[i].classList.add(coresDefinidas[i]);
-                atualizarTeclaVirtual(palavraChutada[i], coresDefinidas[i]); // Atualiza a tecla do teclado virtual em sincronia!
+                
+                // CORREÇÃO CRUCIAL: Passamos chuteLimpo[i] (ex: 'C' em vez de 'Ç') 
+                // para que o teclado virtual consiga encontrar e pintar a tecla correspondente.
+                atualizarTeclaVirtual(chuteLimpo[i], coresDefinidas[i]); 
             }, 250);
 
         }, i * 300); // Cada quadrado espera 300ms a mais que o anterior para começar
