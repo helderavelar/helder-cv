@@ -119,3 +119,27 @@ header h1 {
 
 .key-wide { flex: 1.5; }
 .font-small { font-size: 0.85rem; }
+
+#message-container {
+    background-color: #ffffff;
+    color: #000000;
+    padding: 12px 20px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    position: absolute;
+    top: 12%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.15s ease-in-out;
+    pointer-events: none; /* Impede que o aviso bloqueie cliques atrás dele */
+    box-shadow: 0 4px 23px 0 rgba(0, 0, 0, 0.2);
+    text-transform: uppercase;
+}
+
+/* Classe que o JavaScript vai injetar para mostrar o aviso */
+#message-container.show {
+    opacity: 1;
+}

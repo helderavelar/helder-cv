@@ -77,13 +77,13 @@ function processarChute() {
 
     // Validação 1: Tem 5 letras?
     if (palavraChutada.length !== 5) {
-        alert("A palavra precisa ter 5 letras. Não tente burlar as regras físicas.");
+        mostrarMensagem("A palavra precisa ter 5 letras. Não tente burlar as regras físicas.");
         return;
     }
 
     // Validação 2: A palavra existe no nosso dicionário?
     if (!todasAsPalavrasValidas.includes(palavraChutada)) {
-        alert("Essa palavra não existe no meu banco de dados. Tente algo real.");
+        mostrarMensagem("Essa palavra não existe no meu banco de dados. Tente algo real.");
         return;
     }
 
@@ -92,7 +92,7 @@ function processarChute() {
 
     // Checa a vitória
     if (palavraChutada === palavraSecreta) {
-        alert("Parabéns, você adivinhou. Uma vitória insignificante na escala cósmica, mas parabéns.");
+        mostrarMensagem("Parabéns, você adivinhou. Uma vitória insignificante na escala cósmica, mas parabéns.");
         linhaAtual = 6; // Bloqueia o jogo
         return;
     }
@@ -103,7 +103,7 @@ function processarChute() {
 
     // Checa a derrota
     if (linhaAtual === 6) {
-        alert(`Suas tentativas evaporaram. A palavra era: ${palavraSecreta}. Que lástima.`);
+        mostrarMensagem(`Suas tentativas evaporaram. A palavra era: ${palavraSecreta}. Que lástima.`);
     }
 }
 
@@ -134,4 +134,15 @@ function revelarCores(quadrados, palavraChutada) {
             quadrados[i].classList.add("absent"); // Cinza
         }
     }
+}
+
+function mostrarMensagem(texto) {
+    const container = document.getElementById("message-container");
+    container.textContent = texto;
+    container.classList.add("show");
+    
+    // Esconde o aviso após 3 segundos de exposição
+    setTimeout(() => {
+        container.classList.remove("show");
+    }, 3000);
 }
