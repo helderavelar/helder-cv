@@ -92,7 +92,7 @@ function processarChute() {
 
     // Checa a vitória
     if (palavraChutada === palavraSecreta) {
-        mostrarMensagem("Parabéns, você adivinhou. Uma vitória insignificante na escala cósmica, mas parabéns.");
+        mostrarMensagemFinal("Parabéns, você adivinhou. Uma vitória insignificante na escala cósmica, mas parabéns.");
         linhaAtual = 6; // Bloqueia o jogo
         return;
     }
@@ -103,7 +103,7 @@ function processarChute() {
 
     // Checa a derrota
     if (linhaAtual === 6) {
-        mostrarMensagem(`Suas tentativas evaporaram. A palavra era: ${palavraSecreta}. Que lástima.`);
+        mostrarMensagemFinal(`Suas tentativas evaporaram. A palavra era: ${palavraSecreta}. Que lástima.`);
     }
 }
 
@@ -146,3 +146,9 @@ function mostrarMensagem(texto) {
         container.classList.remove("show");
     }, 3000);
 }
+
+function mostrarMensagemFinal(texto) {
+    const container = document.getElementById("message-container");
+    container.textContent = texto;
+    container.classList.add("show");
+    }
