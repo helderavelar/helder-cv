@@ -1,10 +1,36 @@
-// Estado global do jogo - controlando o inevitável avanço do tempo e das tentativas
+// Estado global do jogo
 let linhaAtual = 0;
 let quadradoAtual = 0;
-// Escolhe uma palavra secreta aleatória da nossa lista do palavras.js
-const palavraSecreta = palavrasSecretas[Math.floor(Math.random() * palavrasSecretas.length)];
 
-// FUNÇÃO AUXILIAR: Transforma "AÇÕES" em "ACOES" para checagens internas
+// Escolhe uma palavra secreta aleatória da nossa lista do palavras.js
+// const palavraSecreta = palavrasSecretas[Math.floor(Math.random() * palavrasSecretas.length)];
+
+// ==========================================
+// ALGORITMO DA SEED DIÁRIA (O MESMO JOGO PARA TODOS)
+// ==========================================
+
+// 1. Definimos uma data de ancoragem (O Dia Zero do TREMO). 
+// Lembre-se: no JavaScript, os meses começam em 0 (Janeiro = 0, Maio = 4, etc.)
+const DATA_ANCHOR = new Date(2026, 0, 1); // 1 de Janeiro de 2026
+DATA_ANCHOR.setHours(0, 0, 0, 0); // Zera as horas para evitar distorções
+
+// 2. Pegamos a data atual do dispositivo do jogador
+const hoje = new Date();
+hoje.setHours(0, 0, 0, 0); // Zera as horas de hoje também
+
+// 3. Calculamos a diferença em milissegundos e convertemos para dias puros
+const diferencaTempo = hoje.getTime() - DATA_ANCHOR.getTime();
+const diasPassados = Math.floor(diferencaTempo / (1000 * 60 * 60 * 24));
+
+// 4. Usamos o operador de módulo (%) para encontrar o índice da palavra.
+// Isso garante que, se o número de dias for maior que a sua lista de palavras, 
+// o jogo volta para o início da lista pacificamente em vez de quebrar.
+const indicePalavraDoDia = diasPassados % palavrasSecretas.length;
+
+// 5. Definimos a palavra secreta imutável das próximas 24 horas
+const palavraSecreta = palavrasSecretas[indicePalavraDoDia];
+
+
 function limparTexto(texto) {
     return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
 }
