@@ -406,7 +406,7 @@ function compartilharResultado() {
     estadoHoje.chutes.forEach(chute => {
         let chuteLimpo = limparTexto(chute);
         let letrasRestantes = secretaLimpa.split("");
-        let linhaEmojis = Array(5).fill("⬛"); // Quadrado cinza por padrão
+        let linhaEmojis = Array(5).fill("⬛");
 
         // 1º Passo: Mapeia os Verdes
         for (let i = 0; i < 5; i++) {
@@ -429,11 +429,32 @@ function compartilharResultado() {
 
     textoCompartilhar += `\nJogue em: ${window.location.href}`;
 
-    // Copia para a área de transferência do sistema operacional
-    navigator.clipboard.writeText(textoCompartilhar).then(() => {
-        mostrarMensagem("Resultado copiado! 📋");
-    }).catch(() => {
-        mostrarMensagem("Erro ao copiar.");
-    });
+    // ============================================================================
+    // A MÁGICA DO POP-UP NATIVO (Web Share API)
+    // ============================================================================
+    if (navigator.share) {
+        // Se o navegador (geralmente mobile) suportar o pop-up de apps:
+        navigator.share({
+            title: 'Meu resultado no TREMO',
+            text: textoCompartilhar
+        })
+        .then(() => {
+            mostrarMensagem("Compartilhado! 🚀");
+        })
+        .catch((error) => {
+            // Se o usuário simplesmente fechar o pop-up sem escolher nenhum app, 
+            // o navegador gera um 'AbortError', que nós ignoramos pacificamente.
+            if (error.name !== "AbortError") {
+                mostrarMensagem("Erro ao abrir compartilhamento.");
+            }
+        });
+    } else {
+        // FALLBACK: Se for um PC ou navegador sem suporte, apenas copia o texto
+        navigator.clipboard.writeText(textoCompartilhar).then(() => {
+            mostrarMensagem("Copiado para a área de transferência! 📋");
+        }).catch(() => {
+            mostrarMensagem("Erro ao copiar resultado.");
+        });
+    }
 }
 
