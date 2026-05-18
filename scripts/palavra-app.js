@@ -164,14 +164,14 @@ function processarChute() {
     quadrados.forEach(q => palavraChutada += q.textContent);
 
     if (palavraChutada.length !== 5) {
-        mostrarMensagem("Letras insuficientes");
+        mostrarMensagem("A palavra precisa ter 5 letras. Não tente burlar as regras físicas.");
         return;
     }
 
     const palavraOficial = todasAsPalavrasValidas.find(p => limparTexto(p) === palavraChutada);
 
     if (!palavraOficial) {
-        mostrarMensagem("Palavra não reconhecida");
+        mostrarMensagem("Essa palavra não existe no meu banco de dados. Tente algo real.");
         return;
     }
 
@@ -199,7 +199,7 @@ function processarChute() {
         localStorage.setItem("tremo_estado_hoje", JSON.stringify(estadoHoje));
         
         setTimeout(() => {
-            mostrarMensagem("Sensacional! Você venceu.");
+            mostrarMensagemFinal("Sensacional! Você venceu. Uma vitória insignificante na escala cósmica, mas parabéns.");
             exibirPainelEstatisticas();
         }, 1500);
         return;
@@ -218,7 +218,7 @@ function processarChute() {
         localStorage.setItem("tremo_estado_hoje", JSON.stringify(estadoHoje));
         
         setTimeout(() => {
-            mostrarMensagem(`Fim de jogo. Era: ${palavraSecreta}`);
+            mostrarMensagemFinal(`Suas tentativas evaporaram. A palavra era: ${palavraSecreta}. Que lástima.`);
             exibirPainelEstatisticas();
         }, 1500);
     }
@@ -289,7 +289,7 @@ function mostrarMensagem(texto) {
     }, 4000); // 4 segundos para os humanos lerem com calma
 }
 
-function exibirPainelEstatisticas() {
+function exibirPainelEstatisticasOld() {
     // Texto cruel e realista com o resumo estatístico do indivíduo
     const resumo = `ESTATÍSTICAS DO TREMO:\n\n` +
                    `Vitórias: ${estatisticas.vitorias}\n` +
@@ -312,3 +312,54 @@ function mostrarMensagemFinal(texto) {
     container.classList.add("show");
     }
 
+function exibirPainelEstatisticas() {
+    const modal = document.getElementById("stats-modal");
+    const closeBtn = document.getElementById("close-modal");
+
+    // 1. Cálculos matemáticos básicos sobre o histórico
+    const totalJogos = estatisticas.vitorias + estatisticas.derrotas;
+    const porcetagemVitorias = totalJogos > 0 ? Math.round((estatisticas.vitorias / totalJogos) * 100) : 0;
+
+    // 2. Injeta os dados nos textos do resumo
+    document.getElementById("stat-jogados").textContent = totalJogos;
+    document.getElementById("stat-vitorias").textContent = `${porcetagemVitorias}%`;
+
+    // 3. Descobre qual é o maior valor dentro da distribuição para usá-lo como base de escala (100% da largura)
+    const maiorValorEscala = Math.max(...estatisticas.distribuicao, 1);
+
+    // 4. Renderiza e estica as barras horizontais
+    for (let i = 0; i < 6; i++) {
+        const barra = document.getElementById(`bar-${i}`);
+        const quantidadeChutesNessaLinha = estatisticas.distribuicao[i];
+        
+        // Atualiza o número de texto dentro da barra
+        barra.textContent = quantidadeChutesNessaLinha;
+        
+        // Calcula a porcentagem visual da largura da barra baseado no maior valor existente
+        const larguraPorcentagem = (quantidadeChutesNessaLinha / maiorValorEscala) * 100;
+        barra.style.width = `${larguraPorcentagem}%`;
+
+        // Se o jogador venceu o jogo de hoje EXATAMENTE nesta linha, destaca a barra em verde
+        // Subtraímos 1 da linhaAtual porque ela avança um número logo após computar o chute
+        if (estadoHoje.ganhou && (linhaAtual - 1) === i) {
+            barra.classList.add("highlight");
+        } else {
+            barra.classList.remove("highlight");
+        }
+    }
+
+    // 5. Exibe o modal na tela adicionando a classe do CSS
+    modal.classList.add("show");
+
+    // 6. Configura o botão de fechar para esconder a janela se clicado
+    closeBtn.onclick = () => {
+        modal.classList.remove("show");
+    };
+
+    // Fecha o modal se o jogador clicar no fundo escurecido do overlay
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            modal.classList.remove("show");
+        }
+    };
+}
