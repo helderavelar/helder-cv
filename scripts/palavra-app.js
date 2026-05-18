@@ -1,13 +1,12 @@
-// Estado global do jogo
+// ============================================================================
+// CONFIGURAÇÃO INICIAL E SEED DIÁRIA (O MESMO JOGO PARA TODOS)
+// ============================================================================
+
 let linhaAtual = 0;
 let quadradoAtual = 0;
 
 // Escolhe uma palavra secreta aleatória da nossa lista do palavras.js
 // const palavraSecreta = palavrasSecretas[Math.floor(Math.random() * palavrasSecretas.length)];
-
-// ==========================================
-// ALGORITMO DA SEED DIÁRIA (O MESMO JOGO PARA TODOS)
-// ==========================================
 
 // 1. Definimos uma data de ancoragem (O Dia Zero do TREMO). 
 // Lembre-se: no JavaScript, os meses começam em 0 (Janeiro = 0, Maio = 4, etc.)
@@ -17,6 +16,7 @@ DATA_ANCHOR.setHours(0, 0, 0, 0); // Zera as horas para evitar distorções
 // 2. Pegamos a data atual do dispositivo do jogador
 const hoje = new Date();
 hoje.setHours(0, 0, 0, 0); // Zera as horas de hoje também
+const dataHojeStr = hoje.toDateString(); // Identificador único do dia de hoje (ex: "Sat May 16 2026")
 
 // 3. Calculamos a diferença em milissegundos e convertemos para dias puros
 const diferencaTempo = hoje.getTime() - DATA_ANCHOR.getTime();
@@ -30,6 +30,36 @@ const indicePalavraDoDia = diasPassados % palavrasSecretas.length;
 // 5. Definimos a palavra secreta imutável das próximas 24 horas
 const palavraSecreta = palavrasSecretas[indicePalavraDoDia];
 
+// ============================================================================
+// CARREGAMENTO DAS ESTATÍSTICAS E ESTADO LOCAL
+// ============================================================================
+let estatisticas = JSON.parse(localStorage.getItem("tremo_estatisticas")) || {
+    vitorias: 0,
+    derrotas: 0,
+    distribuicao: [0, 0, 0, 0, 0, 0] // Índice 0 = 1 tentativa, Índice 5 = 6 tentativas
+};
+
+let estadoHoje = JSON.parse(localStorage.getItem("tremo_estado_hoje")) || {
+    data: "",
+    finalizado: false,
+    ganhou: false,
+    chutes: []
+};
+
+// Se mudou o dia, limpamos o estado do jogo diário, mas mantemos as estatísticas eternas
+if (estadoHoje.data !== dataHojeStr) {
+    estadoHoje = {
+        data: dataHojeStr,
+        finalizado: false,
+        ganhou: false,
+        chutes: []
+    };
+    localStorage.setItem("tremo_estado_hoje", JSON.stringify(estadoHoje));
+}
+
+// ============================================================================
+// INICIALIZAÇÃO DO JOGO
+// ============================================================================
 
 function limparTexto(texto) {
     return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
@@ -39,6 +69,7 @@ function limparTexto(texto) {
 document.addEventListener("DOMContentLoaded", () => {
     inicializarTecladoFisico();
     inicializarTecladoVirtual();
+    reconstituirJogoSalvo();
 });
 
 // 1. Escuta o teclado do computador
@@ -95,73 +126,113 @@ function deletarLetra() {
     }
 }
 
-// 5. A Lógica Principal: Avaliar a palavra quando o Enter é pressionado
+// ============================================================================
+// LOGICA DE RECONSTITUIÇÃO (SE JÁ JOGOU HOJE)
+// ============================================================================
+function reconstituirJogoSalvo() {
+    if (estadoHoje.chutes.length === 0) return;
+
+    const linhas = document.querySelectorAll(".row");
+    
+    estadoHoje.chutes.forEach((palavraOficial, index) => {
+        const quadrados = linhas[index].querySelectorAll(".tile");
+        
+        // Escreve a palavra com a ortografia correta nos quadrados
+        for (let i = 0; i < 5; i++) {
+            quadrados[i].textContent = palavraOficial[i];
+        }
+        
+        // Pinta as cores imediatamente (sem animação delay para não irritar)
+        revelarCores(quadrados, palavraOficial, false);
+        linhaAtual++;
+    });
+
+    if (estadoHoje.finalizado) {
+        exibirPainelEstatisticas();
+    }
+}
+
+// ============================================================================
+// PROCESSAMENTO DO PALPITE: Avaliar a palavra quando o Enter é pressionado
+// ============================================================================
 function processarChute() {
     const linhas = document.querySelectorAll(".row");
-    if (linhaAtual >= 6) return; // O jogo já acabou de forma deprimente
+    if (linhaAtual >= 6 || estadoHoje.finalizado) return;
 
     const quadrados = linhas[linhaAtual].querySelectorAll(".tile");
-    
-    // Monta a palavra que o usuário digitou
     let palavraChutada = "";
     quadrados.forEach(q => palavraChutada += q.textContent);
 
-    // Validação 1: Tem 5 letras?
     if (palavraChutada.length !== 5) {
-        mostrarMensagem("A palavra precisa ter 5 letras. Não tente burlar as regras físicas.");
+        mostrarMensagem("Letras insuficientes");
         return;
     }
 
-    // Validação 2: A palavra existe no nosso dicionário?
-    // Buscamos no dicionário se existe alguma palavra que, sem acento, seja igual ao chute
     const palavraOficial = todasAsPalavrasValidas.find(p => limparTexto(p) === palavraChutada);
 
     if (!palavraOficial) {
-        mostrarMensagem("Essa palavra não existe no meu banco de dados. Tente algo real.");
+        mostrarMensagem("Palavra não reconhecida");
         return;
     }
 
-    // SUBSTUIÇÃO VISUAL: Se achou "AÇÕES", reescreve os quadradinhos com a acentuação correta!
+    // Aplica a ortografia correta na interface
     for (let i = 0; i < 5; i++) {
         quadrados[i].textContent = palavraOficial[i];
     }
 
-    // Se passou pelas validações, vamos pintar os quadradinhos
-    revelarCores(quadrados, palavraOficial);
+    // Salva o chute no estado do dia
+    estadoHoje.chutes.push(palavraOficial);
+    localStorage.setItem("tremo_estado_hoje", JSON.stringify(estadoHoje));
 
-    // Espera a animação dos quadradinhos terminar antes de julgar o destino do jogador
-    setTimeout(() => {
-        // Checa a vitória comparando as versões limpas
-        if (limparTexto(palavraOficial) === limparTexto(palavraSecreta)) {
-            mostrarMensagemFinal("Parabéns, você adivinhou. Uma vitória insignificante na escala cósmica, mas parabéns.");
-            linhaAtual = 6; // Bloqueia o jogo
-            return;
-        }
+    // Roda as cores com animação
+    revelarCores(quadrados, palavraOficial, true);
 
-        // Avança para a próxima tentativa
-        linhaAtual++;
-        quadradoAtual = 0;
+    // Checa Vitória
+    if (limparTexto(palavraOficial) === limparTexto(palavraSecreta)) {
+        estadoHoje.finalizado = true;
+        estadoHoje.ganhou = true;
+        
+        // Atualiza estatísticas eternas
+        estatisticas.vitorias++;
+        estatisticas.distribuicao[linhaAtual]++;
+        localStorage.setItem("tremo_estatisticas", JSON.stringify(estatisticas));
+        localStorage.setItem("tremo_estado_hoje", JSON.stringify(estadoHoje));
+        
+        setTimeout(() => {
+            mostrarMensagem("Sensacional! Você venceu.");
+            exibirPainelEstatisticas();
+        }, 1500);
+        return;
+    }
 
-        // Checa a derrota
-        if (linhaAtual === 6) {
-            mostrarMensagemFinal(`Suas tentativas evaporaram. A palavra era: ${palavraSecreta}. Que lástima.`);
-        }
-    }, 1700); // 1700ms é o tempo exato para o último quadrado terminar de girar
+    linhaAtual++;
+    quadradoAtual = 0;
 
+    // Checa Derrota
+    if (linhaAtual === 6) {
+        estadoHoje.finalizado = true;
+        estadoHoje.ganhou = false;
+        
+        estatisticas.derrotas++;
+        localStorage.setItem("tremo_estatisticas", JSON.stringify(estatisticas));
+        localStorage.setItem("tremo_estado_hoje", JSON.stringify(estadoHoje));
+        
+        setTimeout(() => {
+            mostrarMensagem(`Fim de jogo. Era: ${palavraSecreta}`);
+            exibirPainelEstatisticas();
+        }, 1500);
+    }
 }
 
-// 6. O Algoritmo Inteligente de Cores (Lida com letras duplicadas)
-function revelarCores(quadrados, palavraChutada) {
-    // Para fins de comparação lógica e atualização do teclado, limpamos os acentos
-    let chuteLimpo = limparTexto(palavraChutada);
+// ============================================================================
+// REVELAÇÃO DE CORES E EXIBIÇÃO DE RESULTADOS
+// ============================================================================
+function revelarCores(quadrados, palavraOficial, animar = true) {
+    let chuteLimpo = limparTexto(palavraOficial);
     let secretaLimpa = limparTexto(palavraSecreta);
-    
     let letrasRestantes = secretaLimpa.split("");
-    
-    // Criamos uma lista para guardar qual cor cada quadrado vai receber
     let coresDefinidas = Array(5).fill("absent");
 
-    // Primeiro Passo: Mapear os VERDES (Posição exata usando as versões limpas)
     for (let i = 0; i < 5; i++) {
         if (chuteLimpo[i] === secretaLimpa[i]) {
             coresDefinidas[i] = "correct";
@@ -169,47 +240,70 @@ function revelarCores(quadrados, palavraChutada) {
         }
     }
 
-    // Segundo Passo: Mapear os AMARELOS (Posição errada usando as versões limpas)
     for (let i = 0; i < 5; i++) {
         if (coresDefinidas[i] === "correct") continue;
-
         const indexNaSecreta = letrasRestantes.indexOf(chuteLimpo[i]);
-
         if (indexNaSecreta !== -1) {
             coresDefinidas[i] = "present";
             letrasRestantes[indexNaSecreta] = null;
         }
     }
 
-    // Terceiro Passo: Aplicar a animação em cascata (O seu show visual)
     for (let i = 0; i < 5; i++) {
-        setTimeout(() => {
-            // Dispara a rotação do quadradinho (certifique-se de ter a classe .flip no CSS)
-            quadrados[i].classList.add("flip");
-            
-            // Truque de mágica: Exatamente aos 250ms (metade da animação),
-            // o quadrado está de perfil. É aí que injetamos a cor de fundo!
+        if (animar) {
             setTimeout(() => {
-                quadrados[i].classList.add(coresDefinidas[i]);
-                
-                // CORREÇÃO CRUCIAL: Passamos chuteLimpo[i] (ex: 'C' em vez de 'Ç') 
-                // para que o teclado virtual consiga encontrar e pintar a tecla correspondente.
-                atualizarTeclaVirtual(chuteLimpo[i], coresDefinidas[i]); 
-            }, 250);
-
-        }, i * 300); // Cada quadrado espera 300ms a mais que o anterior para começar
+                quadrados[i].classList.add("flip");
+                setTimeout(() => {
+                    quadrados[i].classList.add(coresDefinidas[i]);
+                    atualizarTeclaVirtual(chuteLimpo[i], coresDefinidas[i]);
+                }, 250);
+            }, i * 300);
+        } else {
+            // Se não for animar (carregamento de página), bota a classe direto
+            quadrados[i].classList.add(coresDefinidas[i]);
+            atualizarTeclaVirtual(chuteLimpo[i], coresDefinidas[i]);
+        }
     }
+}
+
+function atualizarTeclaVirtual(letra, cor) {
+    const botoes = document.querySelectorAll(".key");
+    botoes.forEach(botao => {
+        if (botao.textContent === letra) {
+            // Se o botão já for verde (correct), não deixa virar amarelo (present)
+            if (botao.classList.contains("correct")) return;
+            if (botao.classList.contains("present") && cor === "absent") return;
+            
+            botao.classList.remove("present", "absent");
+            botao.classList.add(cor);
+        }
+    });
 }
 
 function mostrarMensagem(texto) {
     const container = document.getElementById("message-container");
     container.textContent = texto;
     container.classList.add("show");
-    
-    // Esconde o aviso após 3 segundos de exposição
     setTimeout(() => {
         container.classList.remove("show");
-    }, 3000);
+    }, 4000); // 4 segundos para os humanos lerem com calma
+}
+
+function exibirPainelEstatisticas() {
+    // Texto cruel e realista com o resumo estatístico do indivíduo
+    const resumo = `ESTATÍSTICAS DO TREMO:\n\n` +
+                   `Vitórias: ${estatisticas.vitorias}\n` +
+                   `Derrotas: ${estatisticas.derrotas}\n\n` +
+                   `DISTRIBUIÇÃO DE PALPITES:\n` +
+                   `1ª tentativa: ${estatisticas.distribuicao[0]}\n` +
+                   `2ª tentativa: ${estatisticas.distribuicao[1]}\n` +
+                   `3ª tentativa: ${estatisticas.distribuicao[2]}\n` +
+                   `4ª tentativa: ${estatisticas.distribuicao[3]}\n` +
+                   `5ª tentativa: ${estatisticas.distribuicao[4]}\n` +
+                   `6ª tentativa: ${estatisticas.distribuicao[5]}\n\n` +
+                   `Volte amanhã para mais um enigma enfadonho.`;
+                   
+    alert(resumo); // Um painel simples. Depois você pode criar uma janelinha modal em HTML/CSS para ficar bonito se desejar.
 }
 
 function mostrarMensagemFinal(texto) {
@@ -218,28 +312,3 @@ function mostrarMensagemFinal(texto) {
     container.classList.add("show");
     }
 
-function atualizarTeclaVirtual(letra, novaCor) {
-    const botoes = document.querySelectorAll(".key");
-    let botaoAlvo = null;
-
-    // Procura qual botão corresponde à letra jogada
-    botoes.forEach(b => {
-        if (b.textContent === letra) {
-            botaoAlvo = b;
-        }
-    });
-
-    if (!botaoAlvo) return; // Se for uma tecla tipo ENTER ou DEL, ignora
-
-    // Regra hierárquica para não "rebaixar" a cor da tecla
-    if (botaoAlvo.classList.contains("correct")) {
-        return; // Se já está verde, não muda mais
-    }
-    if (botaoAlvo.classList.contains("present") && novaCor === "absent") {
-        return; // Se já está amarelo, não pode virar cinza
-    }
-
-    // Remove estados antigos menores e adiciona a nova cor
-    botaoAlvo.classList.remove("present", "absent");
-    botaoAlvo.classList.add(novaCor);
-}
