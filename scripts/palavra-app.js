@@ -67,9 +67,9 @@ function limparTexto(texto) {
 
 // Aguarda o HTML carregar completamente antes de começar a escutar os comandos
 document.addEventListener("DOMContentLoaded", () => {
+    reconstituirJogoSalvo();
     inicializarTecladoFisico();
     inicializarTecladoVirtual();
-    reconstituirJogoSalvo();
 
     // DETALHE 3: Botão para abrir estatísticas a qualquer momento
     document.getElementById("btn-stats").addEventListener("click", exibirPainelEstatisticas);
@@ -80,7 +80,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // 1. Escuta o teclado do computador
 function inicializarTecladoFisico() {
-    document.addEventListener("keydown", (e) => {
+        if (estadoHoje.finalizado) {
+            return; 
+        }    
+        document.addEventListener("keydown", (e) => {
         const tecla = e.key.toUpperCase();
         
         if (tecla === "ENTER") {
@@ -95,6 +98,9 @@ function inicializarTecladoFisico() {
 
 // 2. Escuta os cliques no teclado da tela (celular)
 function inicializarTecladoVirtual() {
+    if (estadoHoje.finalizado) {
+            return; 
+        }
     const botoes = document.querySelectorAll(".key");
     botoes.forEach(botao => {
         botao.addEventListener("click", () => {
@@ -327,6 +333,17 @@ function exibirPainelEstatisticas() {
     const closeBtn = document.getElementById("close-modal");
     const shareBtn = document.getElementById("btn-compartilhar");
 
+// PROGRAMAÇÃO DEFENSIVA: Ativa ou desativa o botão de compartilhar logo de cara!
+    // Ele só aparece se estiver no Modo Diário E o jogo de hoje já tiver terminado.
+    if (estadoHoje.finalizado) {
+        shareBtn.style.display = "block";
+    } else {
+        shareBtn.style.display = "none";
+    }
+
+    // Abre o modal logo em seguida, garantindo que o usuário veja a janela
+    modal.classList.add("show");
+    
     // 1. Cálculos matemáticos básicos sobre o histórico
     const totalJogos = estatisticas.vitorias + estatisticas.derrotas;
     const porcetagemVitorias = totalJogos > 0 ? Math.round((estatisticas.vitorias / totalJogos) * 100) : 0;
@@ -341,6 +358,7 @@ function exibirPainelEstatisticas() {
     // 4. Renderiza e estica as barras horizontais
     for (let i = 0; i < 6; i++) {
         const barra = document.getElementById(`bar-${i}`);
+        if (!barra) continue; // Evita quebra caso falte alguma barra no HTML
         const quantidadeChutesNessaLinha = estatisticas.distribuicao[i];
         
         // Atualiza o número de texto dentro da barra
@@ -377,12 +395,12 @@ function exibirPainelEstatisticas() {
 
 // DETALHE 4: O gerador de blocos de emojis para o clipboard
 function compartilharResultado() {
-    if (modoAtual !== "diario" || !estadoHoje.finalizado) return;
+    if (!estadoHoje.finalizado) return;
 
     // Cabeçalho da mensagem
     let textoCompartilhar = `TREMO ${estadoHoje.ganhou ? estadoHoje.chutes.length : "X"}/6\n\n`;
 
-    const secretaLimpa = limparTexto(palavraSecretaDiaria);
+    const secretaLimpa = limparTexto(palavraSecreta);
 
     // Varre todos os chutes feitos hoje para recriar o mapa gráfico
     estadoHoje.chutes.forEach(chute => {
@@ -419,11 +437,3 @@ function compartilharResultado() {
     });
 }
 
-function gerenciarEstadoTecladoVisual() {
-    const teclado = document.getElementById("keyboard");
-    if (modoAtual === "diario" && estadoHoje.finalizado) {
-        teclado.classList.add("disabled");
-    } else {
-        teclado.classList.remove("disabled");
-    }
-}
