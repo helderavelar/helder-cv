@@ -70,6 +70,12 @@ document.addEventListener("DOMContentLoaded", () => {
     inicializarTecladoFisico();
     inicializarTecladoVirtual();
     reconstituirJogoSalvo();
+
+    // DETALHE 3: Botão para abrir estatísticas a qualquer momento
+    document.getElementById("btn-stats").addEventListener("click", exibirPainelEstatisticas);
+    
+    // DETALHE 4: Botão de compartilhar resultado
+    document.getElementById("btn-compartilhar").addEventListener("click", compartilharResultado);
 });
 
 // 1. Escuta o teclado do computador
@@ -200,8 +206,10 @@ function processarChute() {
         
         setTimeout(() => {
             mostrarMensagemFinal("Sensacional! Você venceu. Uma vitória insignificante na escala cósmica, mas parabéns.");
-            exibirPainelEstatisticas();
         }, 1500);
+        setTimeout(() => {
+            exibirPainelEstatisticas();
+        }, 2000);
         return;
     }
 
@@ -219,8 +227,10 @@ function processarChute() {
         
         setTimeout(() => {
             mostrarMensagemFinal(`Suas tentativas evaporaram. A palavra era: ${palavraSecreta}. Que lástima.`);
-            exibirPainelEstatisticas();
         }, 1500);
+        setTimeout(() => {
+            exibirPainelEstatisticas();
+        }, 2000);
     }
 }
 
@@ -315,6 +325,7 @@ function mostrarMensagemFinal(texto) {
 function exibirPainelEstatisticas() {
     const modal = document.getElementById("stats-modal");
     const closeBtn = document.getElementById("close-modal");
+    const shareBtn = document.getElementById("btn-compartilhar");
 
     // 1. Cálculos matemáticos básicos sobre o histórico
     const totalJogos = estatisticas.vitorias + estatisticas.derrotas;
@@ -362,4 +373,57 @@ function exibirPainelEstatisticas() {
             modal.classList.remove("show");
         }
     };
+}
+
+// DETALHE 4: O gerador de blocos de emojis para o clipboard
+function compartilharResultado() {
+    if (modoAtual !== "diario" || !estadoHoje.finalizado) return;
+
+    // Cabeçalho da mensagem
+    let textoCompartilhar = `TREMO ${estadoHoje.ganhou ? estadoHoje.chutes.length : "X"}/6\n\n`;
+
+    const secretaLimpa = limparTexto(palavraSecretaDiaria);
+
+    // Varre todos os chutes feitos hoje para recriar o mapa gráfico
+    estadoHoje.chutes.forEach(chute => {
+        let chuteLimpo = limparTexto(chute);
+        let letrasRestantes = secretaLimpa.split("");
+        let linhaEmojis = Array(5).fill("⬛"); // Quadrado cinza por padrão
+
+        // 1º Passo: Mapeia os Verdes
+        for (let i = 0; i < 5; i++) {
+            if (chuteLimpo[i] === secretaLimpa[i]) {
+                linhaEmojis[i] = "🟩";
+                letrasRestantes[i] = null;
+            }
+        }
+        // 2º Passo: Mapeia os Amarelos
+        for (let i = 0; i < 5; i++) {
+            if (linhaEmojis[i] === "🟩") continue;
+            const idx = letrasRestantes.indexOf(chuteLimpo[i]);
+            if (idx !== -1) {
+                linhaEmojis[i] = "🟨";
+                letrasRestantes[idx] = null;
+            }
+        }
+        textoCompartilhar += linhaEmojis.join("") + "\n";
+    });
+
+    textoCompartilhar += `\nJogue em: ${window.location.href}`;
+
+    // Copia para a área de transferência do sistema operacional
+    navigator.clipboard.writeText(textoCompartilhar).then(() => {
+        mostrarMensagem("Resultado copiado! 📋");
+    }).catch(() => {
+        mostrarMensagem("Erro ao copiar.");
+    });
+}
+
+function gerenciarEstadoTecladoVisual() {
+    const teclado = document.getElementById("keyboard");
+    if (modoAtual === "diario" && estadoHoje.finalizado) {
+        teclado.classList.add("disabled");
+    } else {
+        teclado.classList.remove("disabled");
+    }
 }
