@@ -1,0 +1,510 @@
+:root {
+    --bg-color: #121213;
+    --text-color: #ffffff;
+    --border-empty: #3a3a3c;
+    --tile-bg: #121213;
+    
+    /* Cores dos estados que o JavaScript usará depois */
+    --color-correct: #538d4e;   /* Verde */
+    --color-present: #b59f3b;   /* Amarelo */
+    --color-absent: #3a3a3c;    /* Cinza Escuro */
+}
+
+html, body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Clear Sans', 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Tranca a altura no limite exato da tela visível do celular */
+    height: 100dvh; 
+    overflow: hidden;
+}
+
+#game-container {
+    width: 100%;
+    max-width: 500px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    /* Respeita a barra de navegação de iPhones e Androids modernos */
+    padding-bottom: calc(10px + env(safe-area-inset-bottom)); 
+    box-sizing: border-box;
+}
+
+header h1 {
+    font-size: 2rem;      /* Reduzido de 2.5rem */
+    font-weight: 700;
+    letter-spacing: 0.2rem;
+    margin: 5px 0;        /* Espaçamento menor */
+    border-bottom: 1px solid var(--border-empty);
+    width: 100vw;
+    text-align: center;
+    padding-bottom: 5px;  /* Reduzido de 10px */
+}
+
+/* A Grade mágica de 6x5 */
+#board {
+    display: grid;
+    grid-template-rows: repeat(6, 1fr);
+    grid-gap: 5px;
+    padding: 10px;
+    width: 100%;
+    max-width: 330px;
+    height: 100%;
+    max-height: 350px; 
+    box-sizing: border-box;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-gap: 5px;
+}
+
+.tile {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border: 2px solid var(--border-empty);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    background-color: var(--tile-bg);
+    user-select: none;
+    box-sizing: border-box;
+}
+
+/* Classes utilitárias que o JavaScript vai injetar nas letras */
+.tile.correct { background-color: var(--color-correct); border-color: var(--color-correct); }
+.tile.present { background-color: var(--color-present); border-color: var(--color-present); }
+.tile.absent  { background-color: var(--color-absent); border-color: var(--color-absent); }
+
+/* Teclado deprimente na parte inferior */
+#keyboard {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    grid-gap: 6px;
+    padding: 5px 0;
+}
+
+.keyboard-row {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    grid-gap: 6px;
+}
+
+/* Mantém o teclado totalmente visível, mas tranca as funções de clique */
+#keyboard.disabled {
+    pointer-events: none; /* Bloqueia interações e cliques completamente */
+}
+
+.key {
+    background-color: #818384;
+    color: var(--text-color);
+    border: 0;
+    padding: 0;
+    margin: 0;
+    height: 48px; /* Reduzido de 58px para economizar espaço valioso */
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+    text-transform: uppercase;
+}
+
+/* O TRUQUE FINAL: Para telas muito pequenas (com menos de 700px de altura total) */
+@media (max-height: 700px) {
+    header h1 {
+        font-size: 1.8rem;
+        margin-bottom: 5px;
+        padding-bottom: 5px;
+    }
+    
+    #board {
+        max-height: 300px; /* Encolhe a grade */
+    }
+    
+    .key {
+        height: 40px; /* Encolhe o teclado */
+        font-size: 0.9rem;
+    }
+}
+
+.key-wide { flex: 1.5; }
+.font-small { font-size: 0.85rem; }
+
+#message-container {
+    background-color: #ffffff;
+    color: #000000;
+    padding: 12px 20px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    position: absolute;
+    top: 12%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.15s ease-in-out;
+    pointer-events: none;
+    box-shadow: 0 4px 23px 0 rgba(0, 0, 0, 0.2);
+    text-transform: uppercase;
+    
+    /* AS MUDANÇAS ESTÃO AQUI: */
+    width: 85%;           /* Ocupa 85% da largura da tela */
+    max-width: 420px;     /* Mas não passa de 420px em telas grandes */
+    text-align: center;   /* Centraliza o texto horroroso lá dentro */
+    box-sizing: border-box;
+    z-index: 300;
+}
+
+/* Classe que o JavaScript vai injetar para mostrar o aviso */
+#message-container.show {
+    opacity: 1;
+}
+
+/* Animação que gira o quadrado em 360 graus na vertical */
+@keyframes flipIn {
+    0% { transform: rotateX(0deg); }
+    45% { transform: rotateX(90deg); } /* Totalmente de perfil (invisível) */
+    55% { transform: rotateX(90deg); } /* Momento exato onde a cor vai mudar */
+    100% { transform: rotateX(0deg); } /* Volta a ficar de frente, mas com a cor nova */
+}
+
+/* Classe que o JavaScript vai injetar para disparar a animação */
+.tile.flip {
+    animation: flipIn 0.5s ease-in-out forwards;
+}
+
+/* Cores para as teclas do teclado conforme o progresso */
+.key.correct { 
+    background-color: var(--color-correct); 
+    color: #ffffff; 
+}
+.key.present { 
+    background-color: var(--color-present); 
+    color: #ffffff; 
+}
+.key.absent { 
+    background-color: var(--color-absent); 
+    color: #777777; /* Deixa o texto da letra meio apagado */
+}
+
+#mode-selector {
+    display: flex;
+    grid-gap: 10px;
+    margin-top: 5px;
+}
+
+.mode-btn {
+    background-color: #3a3a3c;
+    color: var(--text-color);
+    border: none;
+    padding: 6px 16px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: background-color 0.2s ease;
+}
+
+/* O modo que estiver ativo ganha a cor verde clássica */
+.mode-btn.active {
+    background-color: var(--color-correct);
+}
+
+/* Camada de fundo escurecida */
+.modal-overlay {
+    display: none; /* Escondido por padrão */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100dvh;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px); /* Suave desfoque no fundo */
+    z-index: 200;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-overlay.show {
+    display: flex;
+}
+
+/* Caixa da janela centralizada */
+.modal-box {
+    background-color: #121213;
+    color: var(--text-color);
+    border: 1px solid var(--border-empty);
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 380px;
+    position: relative;
+    box-sizing: border-box;
+    text-align: center;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #565758;
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+.modal-box h2, .modal-box h3 {
+    margin-top: 0;
+    letter-spacing: 0.1rem;
+    font-size: 1.1rem;
+}
+
+/* Grid de números jogados e porcentagem */
+.stats-summary {
+    display: flex;
+    justify-content: center;
+    grid-gap: 30px;
+    margin-bottom: 25px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #818384;
+}
+
+/* Estrutura do Gráfico de Barras */
+.chart-container {
+    display: flex;
+    flex-direction: column;
+    grid-gap: 6px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.chart-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.row-num {
+    font-size: 0.85rem;
+    font-weight: bold;
+    width: 15px;
+    text-align: left;
+}
+
+.bar-wrapper {
+    flex: 1;
+    background-color: transparent;
+    margin-left: 5px;
+}
+
+/* A barra interna que vai esticar via JS */
+.bar-fill {
+    background-color: #3a3a3c;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-align: right;
+    padding-right: 8px;
+    width: 0%; /* Começa em zero e o JS altera */
+    min-width: 20px; /* Garante que o número '0' apareça mesmo sem barras */
+    box-sizing: border-box;
+    border-radius: 2px;
+    transition: width 0.5s ease-out; /* Transição suave de crescimento */
+}
+
+/* Se o usuário acertou naquela linha específica, a barra ganha destaque verde */
+.bar-fill.highlight {
+    background-color: var(--color-correct);
+}
+
+.modal-footer {
+    font-size: 0.8rem;
+    color: #818384;
+    margin-bottom: 0;
+}
+
+/* Camada de fundo escurecida */
+.modal-overlay {
+    display: none; /* Escondido por padrão */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100dvh;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px); /* Suave desfoque no fundo */
+    z-index: 200;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-overlay.show {
+    display: flex;
+}
+
+/* Caixa da janela centralizada */
+.modal-box {
+    background-color: #121213;
+    color: var(--text-color);
+    border: 1px solid var(--border-empty);
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 380px;
+    position: relative;
+    box-sizing: border-box;
+    text-align: center;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #565758;
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+.modal-box h2, .modal-box h3 {
+    margin-top: 0;
+    letter-spacing: 0.1rem;
+    font-size: 1.1rem;
+}
+
+/* Grid de números jogados e porcentagem */
+.stats-summary {
+    display: flex;
+    justify-content: center;
+    grid-gap: 30px;
+    margin-bottom: 25px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #818384;
+}
+
+/* Estrutura do Gráfico de Barras */
+.chart-container {
+    display: flex;
+    flex-direction: column;
+    grid-gap: 6px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.chart-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.row-num {
+    font-size: 0.85rem;
+    font-weight: bold;
+    width: 15px;
+    text-align: left;
+}
+
+.bar-wrapper {
+    flex: 1;
+    background-color: transparent;
+    margin-left: 5px;
+}
+
+/* A barra interna que vai esticar via JS */
+.bar-fill {
+    background-color: #3a3a3c;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-align: right;
+    padding-right: 8px;
+    width: 0%; /* Começa em zero e o JS altera */
+    min-width: 20px; /* Garante que o número '0' apareça mesmo sem barras */
+    box-sizing: border-box;
+    border-radius: 2px;
+    transition: width 0.5s ease-out; /* Transição suave de crescimento */
+}
+
+/* Se o usuário acertou naquela linha específica, a barra ganha destaque verde */
+.bar-fill.highlight {
+    background-color: var(--color-correct);
+}
+
+.modal-footer {
+    font-size: 0.8rem;
+    color: #818384;
+    margin-bottom: 0;
+}
+
+/* O Botão de Compartilhar estilo Wordle */
+.share-btn {
+    display: none; /* Escondido por padrão, o JS só mostra se o jogo diário acabar */
+    background-color: var(--color-correct);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 15px;
+    width: 100%;
+    text-transform: uppercase;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+.share-btn:hover {
+    opacity: 0.9;
+}

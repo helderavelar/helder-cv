@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TREMO</title>
+    <link rel="stylesheet" href="css/palavra.css">
+</head>
+<body>
+
+    <div id="game-container">
+        <header>
+ <h1>TREMO <button id="btn-stats" style="background:none; border:none; cursor:pointer; font-size:1.6rem; vertical-align:middle; padding:0; margin-left:5px;">📊</button></h1>
+        </header>
+
+        <!-- Grade de Palavras -->
+        <div id="board">
+            <!-- Linha 1 (Repita essa estrutura de linha 6 vezes no seu arquivo final) -->
+            <div class="row">
+                <div class="tile"></div>
+                <div class="tile"></div>
+                <div class="tile"></div>
+                <div class="tile"></div>
+                <div class="tile"></div>
+            </div>
+            <!-- Linha 2, Linha 3, Linha 4, Linha 5, Linha 6 vêm aqui embaixo... -->
+            <div class="row">
+                <div class="tile"></div>
+                <div class="tile"></div>
+                <div class="tile"></div>
+                <div class="tile"></div>
+                <div class="tile"></div>
+            </div>
+            <div class="row">
+                <div class="tile"></div>
+                <div class="tile"></div>
+                <div class="tile"></div>
+                <div class="tile"></div>
+                <div class="tile"></div>
+            </div>
+            <div class="row">
+                <div class="tile"></div>
+                <div class="tile"></div>
+                <div class="tile"></div>
+                <div class="tile"></div>
+                <div class="tile"></div>
+            </div>
+            <div class="row">
+                <div class="tile"></div>
+                <div class="tile"></div>
+                <div class="tile"></div>
+                <div class="tile"></div>
+                <div class="tile"></div>
+            </div>
+            <div class="row">
+                <div class="tile"></div>
+                <div class="tile"></div>
+                <div class="tile"></div>
+                <div class="tile"></div>
+                <div class="tile"></div>
+            </div>
+        </div>
+
+        <!-- Container para mensagens não invasivas -->
+    <div id="message-container"></div>
+
+        <!-- Teclado Virtual -->
+        <div id="keyboard">
+            <div class="keyboard-row">
+                <button class="key">Q</button><button class="key">W</button><button class="key">E</button><button class="key">R</button><button class="key">T</button><button class="key">Y</button><button class="key">U</button><button class="key">I</button><button class="key">O</button><button class="key">P</button>
+            </div>
+            <div class="keyboard-row">
+                <button class="key">A</button><button class="key">S</button><button class="key">D</button><button class="key">F</button><button class="key">G</button><button class="key">H</button><button class="key">J</button><button class="key">K</button><button class="key">L</button><button class="key font-small">DEL</button>
+            </div>
+            <div class="keyboard-row">
+                <button class="key">Z</button><button class="key">X</button><button class="key">C</button><button class="key">V</button><button class="key">B</button><button class="key">N</button><button class="key">M</button><button class="key key-wide font-small">ENTER</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="stats-modal" class="modal-overlay">
+        <div class="modal-box">
+            <button id="close-modal" class="close-btn">&times;</button>
+            
+            <h2>ESTATÍSTICAS</h2>
+            
+            <div class="stats-summary">
+                <div class="stat-item">
+                    <span id="stat-jogados" class="stat-number">0</span>
+                    <span class="stat-label">Jogados</span>
+                </div>
+                <div class="stat-item">
+                    <span id="stat-vitorias" class="stat-number">0%</span>
+                    <span class="stat-label">Vitórias</span>
+                </div>
+            </div>
+
+            <h3>DISTRIBUIÇÃO DE PALPITES</h3>
+            
+            <div class="chart-container">
+                <div class="chart-row">
+                    <span class="row-num">1</span>
+                    <div class="bar-wrapper"><div id="bar-0" class="bar-fill">0</div></div>
+                </div>
+                <div class="chart-row">
+                    <span class="row-num">2</span>
+                    <div class="bar-wrapper"><div id="bar-1" class="bar-fill">0</div></div>
+                </div>
+                <div class="chart-row">
+                    <span class="row-num">3</span>
+                    <div class="bar-wrapper"><div id="bar-2" class="bar-fill">0</div></div>
+                </div>
+                <div class="chart-row">
+                    <span class="row-num">4</span>
+                    <div class="bar-wrapper"><div id="bar-3" class="bar-fill">0</div></div>
+                </div>
+                <div class="chart-row">
+                    <span class="row-num">5</span>
+                    <div class="bar-wrapper"><div id="bar-4" class="bar-fill">0</div></div>
+                </div>
+                <div class="chart-row">
+                    <span class="row-num">6</span>
+                    <div class="bar-wrapper"><div id="bar-5" class="bar-fill">0</div></div>
+                </div>
+            </div>
+            
+            <p class="modal-footer">Volte amanhã para um novo TREMO.</p>
+            <button id="btn-compartilhar" class="share-btn">Compartilhar 📋</button>
+       </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="scripts/palavras.js"></script>
+    <script src="scripts/palavra-app.js"></script>
+</body>
+</html>
