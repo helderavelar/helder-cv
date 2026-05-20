@@ -1,4 +1,4 @@
-/* Aviso: Cores vibrantes detectadas. Use com cautela para não ofuscar o recrutador. */
+/* Aviso: Cores vibrantes detectadas. Use com cautela para nï¿½o ofuscar o recrutador. */
 
 :root {
     --primaria: #6c5ce7;
@@ -159,9 +159,9 @@ footer p {
 
 .tab-container {
     display: flex;
-    justify-content: space-between; /* Distribui o espaço entre eles */
+    justify-content: space-between; /* Distribui o espaï¿½o entre eles */
     align-items: stretch;
-    gap: 5px;             /* Pequeno espaço entre os botões */
+    gap: 5px;             /* Pequeno espaï¿½o entre os botï¿½es */
     margin-bottom: 20px;
     border-bottom: 1px solid #ccc;
     width: 100%;          /* Garante que o menu ocupe a largura toda */
@@ -169,7 +169,7 @@ footer p {
 }
 
 .tab-link {
-    flex: 1;              /* Faz com que os 3 botões tenham exatamente o mesmo tamanho */
+    flex: 1;              /* Faz com que os 3 botï¿½es tenham exatamente o mesmo tamanho */
     background: none;
     border: none;
     padding: 12px 5px;    /* Reduzi um pouco o padding lateral */
@@ -179,7 +179,7 @@ footer p {
     color: #555;
     transition: 0.3s;
     
-    /* O segredo para não quebrar a linha: */
+    /* O segredo para nï¿½o quebrar a linha: */
     white-space: nowrap;  
     text-align: center;
     font-size: 14px;      /* Tamanho base */
@@ -190,10 +190,10 @@ footer p {
     color: #007bff;
 }
 
-/* Ajuste específico para telemóveis muito pequenos */
+/* Ajuste especï¿½fico para telemï¿½veis muito pequenos */
 @media (max-width: 400px) {
     .tab-link {
-        font-size: 11px; /* Diminui a letra para caber em ecrãs minúsculos */
+        font-size: 11px; /* Diminui a letra para caber em ecrï¿½s minï¿½sculos */
         padding: 10px 2px;
     }
 }
@@ -228,7 +228,7 @@ footer p {
 
 /* Os itens do carrossel */
 .carousel-item {
-    display: none; /* Esconde todos por padrão */
+    display: none; /* Esconde todos por padrï¿½o */
     width: 100%;
 }
 
@@ -253,7 +253,7 @@ footer p {
     font-size: 14px;
 }
 
-/* Botões */
+/* Botï¿½es */
 .prev, .next {
     position: absolute;
     top: 50%;
@@ -276,7 +276,7 @@ footer p {
     to { opacity: 1; }
 }
 
-/* Estilo da lista de publicações */
+/* Estilo da lista de publicaï¿½ï¿½es */
 .lista-publicacoes {
     padding-left: 20px;
 }
@@ -287,7 +287,7 @@ footer p {
     color: #333;
 }
 
-/* Estilo dos links das publicações */
+/* Estilo dos links das publicaï¿½ï¿½es */
 .lista-publicacoes a {
     color: #007bff;
     text-decoration: none;
@@ -299,13 +299,13 @@ footer p {
     text-decoration: underline;
 }
 
-/* Estilo para prémios e destaques */
+/* Estilo para prï¿½mios e destaques */
 .premios {
     list-style-type: none;
     padding-left: 0;
     margin-top: 5px;
     font-size: 0.9em;
-    color: #28a745; /* Um verde esperança, embora eu não saiba o que é isso */
+    color: #28a745; /* Um verde esperanï¿½a, embora eu nï¿½o saiba o que ï¿½ isso */
     font-weight: bold;
 }
 
