@@ -171,7 +171,7 @@
         const tamanhoSelecionado = document.querySelector('input[name="tamanho"]:checked');
         
         if (!tamanhoSelecionado) {
-            alert("Por favor, selecione um tamanho. Eu não posso adivinhar o que você quer.");
+            alert("Por favor, selecione suas opções.");
             return;
         }
 
@@ -239,7 +239,7 @@
                 btn.innerText = "📋 COPIAR PEDIDO PARA O WHATSAPP";
             }, 3000);
         }).catch(err => {
-            alert("Erro ao copiar. O universo está contra você hoje, como sempre.");
+            alert("Erro ao copiar.");
         });
     }
 </script>
