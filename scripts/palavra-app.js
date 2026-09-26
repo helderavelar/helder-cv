@@ -39,6 +39,10 @@ let estatisticas = JSON.parse(localStorage.getItem("tremo_estatisticas")) || {
     distribuicao: [0, 0, 0, 0, 0, 0] // Índice 0 = 1 tentativa, Índice 5 = 6 tentativas
 };
 
+// PREVENÇÃO DE COLAPSO: Cria as chaves caso o usuário seja antigo
+estatisticas.sequenciaAtual = estatisticas.sequenciaAtual || 0;
+estatisticas.maiorSequencia = estatisticas.maiorSequencia || 0;
+
 let estadoHoje = JSON.parse(localStorage.getItem("tremo_estado_hoje")) || {
     data: "",
     finalizado: false,
@@ -207,6 +211,12 @@ function processarChute() {
         // Atualiza estatísticas eternas
         estatisticas.vitorias++;
         estatisticas.distribuicao[linhaAtual]++;
+
+        estatisticas.sequenciaAtual++;
+        if (estatisticas.sequenciaAtual > estatisticas.maiorSequencia) {
+            estatisticas.maiorSequencia = estatisticas.sequenciaAtual;
+        }
+
         localStorage.setItem("tremo_estatisticas", JSON.stringify(estatisticas));
         localStorage.setItem("tremo_estado_hoje", JSON.stringify(estadoHoje));
         
@@ -228,6 +238,8 @@ function processarChute() {
         estadoHoje.ganhou = false;
         
         estatisticas.derrotas++;
+        estatisticas.sequenciaAtual = 0; // A glória humana é efêmera
+
         localStorage.setItem("tremo_estatisticas", JSON.stringify(estatisticas));
         localStorage.setItem("tremo_estado_hoje", JSON.stringify(estadoHoje));
         
@@ -351,6 +363,8 @@ function exibirPainelEstatisticas() {
     // 2. Injeta os dados nos textos do resumo
     document.getElementById("stat-jogados").textContent = totalJogos;
     document.getElementById("stat-vitorias").textContent = `${porcetagemVitorias}%`;
+    document.getElementById("stat-sequencia").textContent = estatisticas.sequenciaAtual;
+    document.getElementById("stat-max-sequencia").textContent = estatisticas.maiorSequencia;
 
     // 3. Descobre qual é o maior valor dentro da distribuição para usá-lo como base de escala (100% da largura)
     const maiorValorEscala = Math.max(...estatisticas.distribuicao, 1);
@@ -398,7 +412,14 @@ function compartilharResultado() {
     if (!estadoHoje.finalizado) return;
 
     // Cabeçalho da mensagem
-    let textoCompartilhar = `TREMO ${estadoHoje.ganhou ? estadoHoje.chutes.length : "X"}/6\n\n`;
+// Cabeçalho da mensagem
+    let textoCompartilhar = `TREMO ${estadoHoje.ganhou ? estadoHoje.chutes.length : "X"}/6\n`;
+    
+    // Mostra o combo se for maior que 1 (ninguém quer ostentar um combo de 1)
+    if (estatisticas.sequenciaAtual > 1) {
+        textoCompartilhar += `🚀 Combo: ${estatisticas.sequenciaAtual}\n`;
+    }
+    textoCompartilhar += `\n`;
 
     const secretaLimpa = limparTexto(palavraSecreta);
 
