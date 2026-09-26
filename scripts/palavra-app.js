@@ -370,7 +370,7 @@ function exibirPainelEstatisticas() {
 
         // Se o jogador venceu o jogo de hoje EXATAMENTE nesta linha, destaca a barra em verde
         // Subtraímos 1 da linhaAtual porque ela avança um número logo após computar o chute
-        if (estadoHoje.ganhou && (linhaAtual - 1) === i) {
+        if (estadoHoje.ganhou && (estadoHoje.chutes.length - 1) === i) {
             barra.classList.add("highlight");
         } else {
             barra.classList.remove("highlight");
