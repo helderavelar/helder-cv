@@ -416,7 +416,7 @@ function compartilharResultado() {
     let textoCompartilhar = `TREMO ${estadoHoje.ganhou ? estadoHoje.chutes.length : "X"}/6\n`;
     
     // Mostra o combo se for maior que 1 (ninguém quer ostentar um combo de 1)
-    if (estatisticas.sequenciaAtual > 1) {
+    if (estatisticas.sequenciaAtual > 0) {
         textoCompartilhar += `🚀 Combo: ${estatisticas.sequenciaAtual}\n`;
     }
     textoCompartilhar += `\n`;
