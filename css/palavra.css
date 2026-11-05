@@ -286,7 +286,7 @@ header h1 {
 .stats-summary {
     display: flex;
     justify-content: center;
-    grid-gap: 30px;
+    grid-gap: 12px;
     margin-bottom: 25px;
 }
 
