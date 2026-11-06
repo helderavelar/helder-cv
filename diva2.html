@@ -1,0 +1,3152 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DIVA 2.0 — Entrevista de Diagnóstico de PHDA em Adultos</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            diva: {
+              dark: '#1A428A',
+              darker: '#122E63',
+              light: '#D4EFFC',
+              lighter: '#EBF8FF',
+              coral: '#E04F5F',
+              coralDark: '#C83E4D',
+              border: '#7CC6F2'
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Estilos clínicos fiéis ao protocolo DIVA 2.0 */
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #F4F7FB;
+      color: #1E293B;
+    }
+
+    .diva-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 1.2rem;
+      height: 1.2rem;
+      border: 2px solid #1A428A;
+      border-radius: 0.25rem;
+      background-color: #fff;
+      display: inline-grid;
+      place-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.15s ease-in-out;
+      margin-top: 0.15rem;
+    }
+
+    .diva-checkbox:checked {
+      background-color: #1A428A;
+      border-color: #1A428A;
+    }
+
+    .diva-checkbox:checked::before {
+      content: "\2713";
+      color: white;
+      font-size: 0.85rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .diva-checkbox:disabled {
+      cursor: default;
+      opacity: 0.9;
+    }
+
+    .diva-checkbox:focus-visible {
+      outline: 2px solid #7CC6F2;
+      outline-offset: 2px;
+    }
+
+    /* Configuração de impressão limpa para PDF / Papel */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-size: 10.5pt;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-only {
+        display: block !important;
+      }
+      .print-break-inside-avoid {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .print-page-break {
+        page-break-before: always;
+      }
+      .shadow-sm, .shadow, .shadow-md, .shadow-lg {
+        box-shadow: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- BARRA SUPERIOR CLÍNICA (Oculta na impressão) -->
+  <header class="bg-diva-dark text-white shadow-md sticky top-0 z-30 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
+      <!-- Marca / Título -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab(0)">
+        <div class="flex items-center gap-1.5 bg-diva-light text-diva-dark px-3 py-1.5 rounded-lg font-extrabold tracking-tight text-lg shadow-inner">
+          <span>DIVA</span>
+          <span class="bg-diva-dark text-white rounded-full px-2 py-0.5 text-sm">2.0</span>
+        </div>
+        <div>
+          <h1 class="font-bold text-sm sm:text-base leading-tight">Entrevista de Diagnóstico de PHDA em Adultos</h1>
+          <p class="text-xs text-diva-light opacity-90">Baseada nos critérios DSM-IV-TR • Edição Portuguesa</p>
+        </div>
+      </div>
+
+      <!-- Contadores em Tempo Real & Botões de Ação -->
+      <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+        <!-- Pílula de Pontuação Rápida -->
+        <div class="hidden xl:flex items-center gap-3 bg-diva-darker/80 border border-white/15 px-3 py-1.5 rounded-lg text-xs">
+          <div>
+            <span class="text-diva-light font-semibold">Défice Atenção (A):</span>
+            <span id="headerScoreA" class="ml-1 font-bold text-white">Adulta 0/9 • Infância 0/9</span>
+          </div>
+          <span class="text-white/30">|</span>
+          <div>
+            <span class="text-diva-light font-semibold">Hiperact./Impuls. (H/I):</span>
+            <span id="headerScoreHI" class="ml-1 font-bold text-white">Adulta 0/9 • Infância 0/9</span>
+          </div>
+        </div>
+
+        <!-- Alternador de Auto-Sugestão -->
+        <label class="flex items-center gap-2 bg-white/10 hover:bg-white/15 px-3 py-1.5 rounded-lg text-xs cursor-pointer transition" title="Assinalar automaticamente 'Sintoma presente: Sim' quando pelo menos 1 exemplo é marcado">
+          <input type="checkbox" id="autoSuggestToggle" checked onchange="toggleAutoSuggest(this.checked)" class="rounded text-diva-coral focus:ring-0 cursor-pointer" />
+          <span>Auto-sugerir presença</span>
+        </label>
+
+        <!-- Botão de Exemplo Clínico -->
+        <button onclick="openDemoModal()" class="bg-white/10 hover:bg-white/20 text-white text-xs font-medium px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition" title="Preencher com um caso clínico de demonstração">
+          <i class="fa-solid fa-wand-magic-sparkles text-diva-light"></i>
+          <span class="hidden sm:inline">Exemplo</span>
+        </button>
+
+        <!-- Botão Nova Entrevista -->
+        <button onclick="openResetModal()" class="bg-diva-coral hover:bg-diva-coralDark text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition shadow-sm" title="Limpar formulário e iniciar nova entrevista">
+          <i class="fa-solid fa-rotate-left"></i>
+          <span class="hidden sm:inline">Nova Entrevista</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Separadores de Navegação + Barra de Progresso -->
+    <div class="bg-diva-darker border-t border-white/10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="flex space-x-1 overflow-x-auto py-1.5 no-scrollbar" aria-label="Etapas da Entrevista">
+          <button onclick="switchTab(0)" id="tabBtn-0" class="tab-btn whitespace-nowrap px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition flex items-center gap-2">
+            <i class="fa-solid fa-book-medical"></i>
+            <span>0. Introdução &amp; Instruções</span>
+          </button>
+          <button onclick="switchTab(1)" id="tabBtn-1" class="tab-btn whitespace-nowrap px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition flex items-center gap-2">
+            <i class="fa-solid fa-user-check"></i>
+            <span>1. Paciente</span>
+          </button>
+          <button onclick="switchTab(2)" id="tabBtn-2" class="tab-btn whitespace-nowrap px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition flex items-center gap-2">
+            <i class="fa-solid fa-bullseye"></i>
+            <span>2. Parte 1: Défice de Atenção</span>
+            <span id="tabBadge-A" class="bg-white/20 text-white text-[11px] px-1.5 py-0.5 rounded-full font-bold">0/9</span>
+          </button>
+          <button onclick="switchTab(3)" id="tabBtn-3" class="tab-btn whitespace-nowrap px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition flex items-center gap-2">
+            <i class="fa-solid fa-bolt"></i>
+            <span>3. Parte 2: Hiperact./Impuls.</span>
+            <span id="tabBadge-HI" class="bg-white/20 text-white text-[11px] px-1.5 py-0.5 rounded-full font-bold">0/9</span>
+          </button>
+          <button onclick="switchTab(4)" id="tabBtn-4" class="tab-btn whitespace-nowrap px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition flex items-center gap-2">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>4. Parte 3: Disfunção (B, C, D)</span>
+            <span id="tabBadge-C" class="bg-white/20 text-white text-[11px] px-1.5 py-0.5 rounded-full font-bold">0/5</span>
+          </button>
+          <button onclick="switchTab(5)" id="tabBtn-5" class="tab-btn whitespace-nowrap px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition flex items-center gap-2">
+            <i class="fa-solid fa-clipboard-check"></i>
+            <span>5. Resumo, Cotação &amp; Exportar</span>
+          </button>
+        </nav>
+      </div>
+      <!-- Barra de Progresso Global -->
+      <div class="w-full bg-slate-800 h-1.5">
+        <div id="overallProgressBar" class="bg-gradient-to-r from-sky-400 to-emerald-400 h-1.5 transition-all duration-300" style="width: 16%"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ÁREA DE TRABALHO PRINCIPAL -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 no-print">
+
+    <!-- ==========================================
+         ABA 0: INTRODUÇÃO, CRÉDITOS & INSTRUÇÕES
+         ========================================== -->
+    <section id="tabPanel-0" class="tab-panel space-y-6">
+      <!-- Capa Hero Fiel à Página 1 do PDF Original -->
+      <div class="rounded-2xl overflow-hidden shadow-md border border-slate-200 bg-white grid grid-cols-1 md:grid-cols-12">
+        <div class="md:col-span-3 bg-diva-dark text-white p-6 sm:p-8 flex flex-col justify-between">
+          <div class="text-xs font-bold tracking-widest uppercase text-diva-light">PORTUGUÊS</div>
+          <div class="my-8">
+            <div class="text-2xl font-extrabold tracking-tight">DIVA</div>
+            <div class="text-lg font-light text-diva-light border-b border-diva-light/40 pb-2 mb-2">Foundation</div>
+            <p class="text-xs italic text-diva-light/90 leading-relaxed">
+              Entrevista de Diagnóstico<br/>de PHDA<br/>em Adultos
+            </p>
+          </div>
+          <div class="text-[11px] text-diva-light/80">
+            J.J.S. Kooij, MD, PhD &amp; M.H. Francken, MSc<br/>
+            2010, DIVA Foundation, Holanda
+          </div>
+        </div>
+
+        <div class="md:col-span-9 bg-gradient-to-b from-[#F2FAFE] to-[#ABE1FA] p-6 sm:p-10 flex flex-col justify-between">
+          <div class="my-4">
+            <div class="flex items-center gap-4 mb-6">
+              <span class="text-5xl sm:text-6xl font-extrabold text-diva-dark tracking-tight">DIVA</span>
+              <span class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-diva-dark text-white flex items-center justify-center text-3xl sm:text-4xl font-extrabold shadow-md">2.0</span>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900 leading-snug">
+              Entrevista de Diagnóstico de PHDA<br/>em Adultos (DIVA)
+            </h2>
+          </div>
+
+          <div class="pt-6 border-t border-diva-dark/15 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex flex-wrap items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-900">
+              <span class="w-5 h-5 rounded-full bg-diva-dark text-white inline-flex items-center justify-center text-xs">D</span><span>iagnostisch</span>
+              <span class="w-5 h-5 rounded-full bg-diva-dark text-white inline-flex items-center justify-center text-xs ml-1">I</span><span>nterview</span>
+              <span class="w-5 h-5 rounded-full bg-diva-dark text-white inline-flex items-center justify-center text-xs ml-1">V</span><span>oor</span>
+              <span class="w-5 h-5 rounded-full bg-diva-dark text-white inline-flex items-center justify-center text-xs ml-1">A</span><span>DHD bij volwassenen</span>
+            </div>
+
+            <button onclick="switchTab(1)" class="bg-diva-dark hover:bg-diva-darker text-white font-semibold px-5 py-2.5 rounded-xl shadow flex items-center gap-2 transition text-sm">
+              <span>Iniciar Entrevista</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Explicação Prévia a ser dada ao Paciente -->
+      <div class="bg-diva-light/60 border-l-4 border-diva-dark rounded-r-xl p-5 shadow-sm">
+        <div class="flex items-start gap-3">
+          <div class="bg-diva-dark text-white w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i class="fa-solid fa-comment-medical"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-diva-dark mb-1">Explicação prévia a ser dada ao paciente (Página 4)</h3>
+            <p class="text-sm text-slate-800 leading-relaxed">
+              «Através desta entrevista são investigados os sintomas de PHDA manifestados por si, tanto no decorrer da infância como na idade adulta. As perguntas baseiam-se nos critérios oficiais de PHDA segundo a DSM-IV. Para cada critério perguntar-lhe-ei se reconhece esse problema. Para o ajudar durante a entrevista darei alguns exemplos que ilustram a forma como as crianças e os adultos podem sentir as dificuldades provocadas por cada um dos sintomas de PHDA. Em primeiro lugar as perguntas são dirigidas a si e, em seguida, ao seu/sua companheiro/a e familiares. O seu companheiro/a conhece-o/a provavelmente só desde a idade adulta e ser-lhe-á pedido que nos informe sobre este período; os seus familiares provavelmente têm uma melhor memória da sua infância. Ambas as fases da vida têm de ser analisadas de modo a que se possa fazer um diagnóstico de PHDA.»
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Introdução e Instruções em 2 Colunas -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Coluna 1: Introdução -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
+          <h3 class="text-lg font-bold text-diva-dark border-b border-slate-100 pb-2 flex items-center gap-2">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>Introdução (Página 2)</span>
+          </h3>
+          <div class="text-sm text-slate-700 space-y-3 leading-relaxed">
+            <p>
+              Para fazer o diagnóstico de PHDA no adulto, segundo a DSM-IV, é necessário confirmar a presença de sintomas de PHDA tanto na infância como na vida adulta. São condições necessárias para o diagnóstico que os sintomas de PHDA tenham tido início na infância e que tenham persistido ao longo da vida até ao momento da presente avaliação. Os sintomas devem estar associados a disfunção clínica significativa ou a disfunção psico-social e afectarem o indivíduo em dois ou mais contextos da vida do dia a dia¹.
+            </p>
+            <p>
+              Dado o facto de a PHDA em adultos ser uma perturbação crónica com início na infância, é necessário diagnosticar os sintomas, a evolução dos mesmos e o nível da disfunção que eles causaram, através de, entre outros, uma entrevista retrospectiva sobre os comportamentos na infância. Se possível, a informação do paciente deve ser complementada pela informação de pessoas que o conheceram em criança (geralmente os pais ou familiares próximos)².
+            </p>
+            <p>
+              <strong>Entrevista de Diagnóstico de PHDA em Adultos (DIVA):</strong> Baseada nos critérios da DSM-IV, é a primeira entrevista estruturada desenvolvida para diagnosticar PHDA em adultos²,³. De modo a facilitar a pesquisa da presença ou ausência de cada um dos 18 critérios de PHDA, tanto na infância como no adulto, são sempre utilizados exemplos concretos e realistas para o comportamento em ambas as fases da vida, bem como exemplos de disfunções em cinco contextos da vida quotidiana: na área profissional e académica; na relação e vida familiar; na interacção social; nos tempos livres e hobbies; na autoconfiança e auto-estima.
+            </p>
+            <p>
+              Sempre que possível, a DIVA deve ser aplicada na presença do parceiro(a) e/ou de familiares, para apreciar informações auto e hetero-anamnésicas (duração aproximada de 1h a 1h30). A comorbilidade verifica-se em cerca de 75% dos casos, pelo que é importante realizar também uma avaliação psiquiátrica para investigar Ansiedade, Perturbações Depressivas, Bipolares, Abuso de Substâncias, Perturbações do Sono e da Personalidade².
+            </p>
+          </div>
+        </div>
+
+        <!-- Coluna 2: Instruções para a realização da DIVA -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
+          <h3 class="text-lg font-bold text-diva-dark border-b border-slate-100 pb-2 flex items-center gap-2">
+            <i class="fa-solid fa-list-check"></i>
+            <span>Instruções para a realização da DIVA (Páginas 3 e 4)</span>
+          </h3>
+          <div class="text-sm text-slate-700 space-y-3 leading-relaxed">
+            <p>A DIVA é composta por três partes, sendo cada uma dirigida para ambas, a infância e a idade adulta:</p>
+            <ul class="list-disc list-inside font-medium text-slate-800 space-y-1">
+              <li>Critérios de Défice de Atenção (A1)</li>
+              <li>Critérios de Hiperactividade/Impulsividade (A2)</li>
+              <li>Idade de Início e Disfunção provocada pelos sintomas de PHDA</li>
+            </ul>
+            <p>
+              <strong>Procedimento em cada item:</strong> Questione em primeiro lugar a presença de sintomas na <strong>idade adulta</strong> (presentes nos últimos 6 meses ou mais) e seguidamente questione sobre a presença do mesmo sintoma na <strong>infância</strong> (entre os 5 e os 12 anos)⁴⁻⁶. Leia em voz alta cada questão, pergunte ao paciente se reconhece ter esse problema e peça para dar um exemplo. Se não reconhecer os sintomas ou existir dúvida, leia os exemplos da lista um a um.
+            </p>
+            <p>
+              O comportamento problemático é considerado presente quando ocorrer com mais frequência ou maior intensidade nessa pessoa do que num grupo semelhante em idade e Q.I., ou quando é claramente causador de disfunção. Para considerar um critério presente não é necessário que o paciente reconheça todos os exemplos. No caso de respostas contraditórias entre parceiro/família e paciente, a regra geral é a de considerar o paciente como sendo o melhor informador⁷.
+            </p>
+            <p>
+              <strong>Idade de início e Disfunção:</strong> Verifique se o paciente sempre apresentou os sintomas e se alguns já se manifestavam antes dos 7 anos (ou indique em que idade começaram). Para validar o diagnóstico precisa de existir disfunção em <strong>pelo menos dois contextos de vida</strong> tanto na infância como na idade adulta.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Créditos e Bibliografia (Acordeão Colapsável) -->
+      <details class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden group">
+        <summary class="px-6 py-4 cursor-pointer font-bold text-diva-dark flex items-center justify-between hover:bg-slate-50 transition">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span>Créditos da Edição Portuguesa e Bibliografia Oficial (Páginas 2 e 4)</span>
+          </span>
+          <i class="fa-solid fa-chevron-down text-slate-400 group-open:rotate-180 transition-transform"></i>
+        </summary>
+        <div class="p-6 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-600 leading-relaxed">
+          <div class="space-y-2">
+            <h4 class="font-bold text-slate-800 text-sm">Créditos</h4>
+            <p>
+              A Entrevista de Diagnóstico de PHDA em Adultos (DIVA) é uma publicação da Fundação DIVA, na Haia, Holanda. Traduções e retroversões suportadas por CADIn – Centro de Apoio ao Desenvolvimento Infantil, Cascais, Portugal. A tradução original de Holandês para Português foi realizada por Veerle Grommen, a retroversão para Holandês foi realizada por Lut Caenen. Revisões de Prof. Carlos Filipe (MD, PhD), CADIn, Cascais, T.I. Annet Bron (MSc) e dr. J.J. Sandra Kooij (MD, PhD), Mariëlle van Bussel (MSc), DIVA Foundation, 2014.
+            </p>
+            <p>
+              Esta publicação foi realizada com todo o cuidado. Contudo, com o decorrer do tempo, partes da publicação podem mudar. Por esta razão, não poderão ser imputados direitos à mesma. Para mais informações e futuras actualizações da DIVA vá a www.divacenter.eu.
+            </p>
+            <p>
+              Reimpressão com autorização de: DSM-IV-TR Manual de Diagnóstico e Estatística das Perturbações Mentais - Quarta Edição, Texto Revisto (2000) American Psychiatric Association (APA).
+            </p>
+          </div>
+          <div class="space-y-1.5">
+            <h4 class="font-bold text-slate-800 text-sm">Bibliografia</h4>
+            <ol class="list-decimal list-inside space-y-1">
+              <li>American Psychiatric Association (APA): DSM-IV-TR Manual de Diagnóstico e Estatística das Perturbações Mentais - Quarta Edição, Texto Revisto, Climepsi Editores, Lisboa, 2002.</li>
+              <li>Diagnostic Interview for ADHD in Adults 2.0 (DIVA 2.0), in: Kooij JJS. Adult ADHD. Diagnostic assessment and treatment. Springer, 2012.</li>
+              <li>Kooij JJS, Francken MH: Entrevista de Diagnóstico de PHDA em Adultos (DIVA). Acessível em www.kenniscentrumadhdbijvolwassenen.nl, 2007 e publicado em Inglês na referência 2.</li>
+              <li>Applegate B, Lahey BB, Hart EL, Biederman J, Hynd GW, Barkley RA, Ollendick T, Frick PJ, Greenhill L, McBurnett K, Newcorn JH, Kerdyk L, Garfinkel B, Waldman I, Shaffer D: Validity of the age-of-onset criterion for ADHD: a report from the DSM-IV field trials. J Am Acad Child Adolesc Psychiatry 1997; 36(9):1211-21.</li>
+              <li>Barkley RA, Biederman J: Toward a broader definition of the age-of-onset criterion for attention-deficit hyperactivity disorder. J Am Acad Child Adolesc Psychiatry 1997; 36(9):1204-10.</li>
+              <li>Faraone SV, Biederman J, Spencer T, Mick E, Murray K, Petty C, Adamson JJ, Monuteaux MC: Diagnosing adult attention deficit hyperactivity disorder: are late onset and subthreshold diagnoses valid? Am J Psychiatry 2006; 163(10):1720-9.</li>
+              <li>Kooij JJS, Boonstra AM, Willemsen-Swinkels SHN, Bekker EM, Noord Id, Buitelaar JL: Reliability, validity, and utility of instruments for self-report and informant report regarding symptoms of Attention-Deficit/Hyperactivity Disorder (ADHD) in adult patients. J Atten Disorders 2008; 11(4):445-458.</li>
+            </ol>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- ==========================================
+         ABA 1: IDENTIFICAÇÃO DO PACIENTE
+         ========================================== -->
+    <section id="tabPanel-1" class="tab-panel hidden space-y-6">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="bg-diva-dark text-white px-6 py-4 flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-bold">Identificação do Paciente e da Entrevista</h2>
+            <p class="text-xs text-diva-light">Página 5 do protocolo oficial DIVA 2.0</p>
+          </div>
+          <i class="fa-solid fa-id-card text-2xl text-diva-light"></i>
+        </div>
+
+        <div class="p-6 sm:p-8 space-y-5">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+            <label for="patientName" class="md:col-span-3 text-sm font-semibold text-slate-700">Nome do Paciente:</label>
+            <div class="md:col-span-9">
+              <input type="text" id="patientName" oninput="updatePatientField('name', this.value)" placeholder="Nome completo do paciente" class="w-full px-4 py-2.5 rounded-lg border-2 border-diva-border bg-diva-lighter/30 focus:bg-white focus:border-diva-dark focus:outline-none text-sm transition" />
+            </div>
+
+            <label for="patientDob" class="md:col-span-3 text-sm font-semibold text-slate-700">Data de Nascimento:</label>
+            <div class="md:col-span-4">
+              <input type="date" id="patientDob" oninput="updatePatientField('dob', this.value)" class="w-full px-4 py-2.5 rounded-lg border-2 border-diva-border bg-diva-lighter/30 focus:bg-white focus:border-diva-dark focus:outline-none text-sm transition" />
+            </div>
+
+            <label class="md:col-span-2 text-sm font-semibold text-slate-700 md:text-right">Sexo:</label>
+            <div class="md:col-span-3 flex items-center gap-6">
+              <label class="inline-flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-800">
+                <input type="checkbox" id="sexM" onchange="setPatientSex('M')" class="diva-checkbox" />
+                <span>M</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-800">
+                <input type="checkbox" id="sexF" onchange="setPatientSex('F')" class="diva-checkbox" />
+                <span>F</span>
+              </label>
+            </div>
+
+            <label for="interviewDate" class="md:col-span-3 text-sm font-semibold text-slate-700">Data da Entrevista:</label>
+            <div class="md:col-span-9">
+              <input type="date" id="interviewDate" oninput="updatePatientField('interviewDate', this.value)" class="w-full sm:w-64 px-4 py-2.5 rounded-lg border-2 border-diva-border bg-diva-lighter/30 focus:bg-white focus:border-diva-dark focus:outline-none text-sm transition" />
+            </div>
+
+            <label for="interviewerName" class="md:col-span-3 text-sm font-semibold text-slate-700">Nome do entrevistador:</label>
+            <div class="md:col-span-9">
+              <input type="text" id="interviewerName" oninput="updatePatientField('interviewer', this.value)" placeholder="Nome do médico / psicólogo / entrevistador" class="w-full px-4 py-2.5 rounded-lg border-2 border-diva-border bg-diva-lighter/30 focus:bg-white focus:border-diva-dark focus:outline-none text-sm transition" />
+            </div>
+
+            <label for="patientNumber" class="md:col-span-3 text-sm font-semibold text-slate-700">Número do paciente:</label>
+            <div class="md:col-span-9">
+              <input type="text" id="patientNumber" oninput="updatePatientField('number', this.value)" placeholder="Número de processo clínico / identificação" class="w-full sm:w-80 px-4 py-2.5 rounded-lg border-2 border-diva-border bg-diva-lighter/30 focus:bg-white focus:border-diva-dark focus:outline-none text-sm transition" />
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-4">
+          <div class="text-xs text-slate-500 flex items-center gap-2">
+            <i class="fa-solid fa-floppy-disk text-diva-dark"></i>
+            <span>Os dados são guardados automaticamente no seu navegador enquanto preenche.</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <button onclick="switchTab(0)" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 text-sm font-medium transition">
+              <i class="fa-solid fa-arrow-left mr-1.5"></i> Voltar
+            </button>
+            <button onclick="switchTab(2)" class="bg-diva-dark hover:bg-diva-darker text-white px-5 py-2 rounded-lg text-sm font-semibold shadow-sm transition">
+              Avançar para Parte 1 (Défice de Atenção) <i class="fa-solid fa-arrow-right ml-1.5"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         ABA 2: PARTE 1 – DÉFICE DE ATENÇÃO (A1-A9)
+         ========================================== -->
+    <section id="tabPanel-2" class="tab-panel hidden space-y-6">
+      <!-- Cabeçalho Coral -->
+      <div class="bg-diva-coral text-white px-6 py-4 rounded-xl shadow-sm flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-extrabold tracking-tight">Parte 1: Sintomas de défice de atenção (DSM-IV critério A1)</h2>
+          <p class="text-xs sm:text-sm text-white/95 mt-1">
+            <strong>Instruções:</strong> os sintomas na idade adulta têm que se manifestar pelo menos há seis meses. Os sintomas na infância referem-se à idade entre os 5 e os 12 anos. Para ser atribuído um sintoma à PHDA, este tem que ter um curso crónico e não episódico.
+          </p>
+        </div>
+        <div class="bg-white/15 backdrop-blur px-4 py-2 rounded-lg text-right flex-shrink-0">
+          <div class="text-[11px] uppercase tracking-wider font-semibold text-white/90">Total Critério A1</div>
+          <div id="part1BannerCounter" class="text-sm font-extrabold">Adulta: 0/9 • Infância: 0/9</div>
+        </div>
+      </div>
+
+      <!-- Navegação Rápida A1-A9 -->
+      <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-2 sticky top-[104px] z-20">
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span class="text-xs font-bold text-slate-500 mr-1">Ir para:</span>
+          <div id="quickNavA" class="flex flex-wrap gap-1.5"></div>
+        </div>
+        <span class="text-xs text-slate-500 hidden md:inline">Assinale os exemplos reconhecidos na idade adulta e na infância</span>
+      </div>
+
+      <!-- Contentor dos Cartões A1 a A9 -->
+      <div id="criteriaContainerA" class="space-y-6"></div>
+
+      <!-- Complemento Critério A (Parte 1) -->
+      <div class="bg-white rounded-xl shadow-sm border-2 border-diva-dark overflow-hidden">
+        <div class="bg-diva-dark text-white px-6 py-3 font-extrabold text-base">
+          Complemento critério A (Défice de Atenção)
+        </div>
+        <div class="p-6 space-y-4 text-sm">
+          <div class="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-slate-100">
+            <p class="text-slate-800">
+              <strong class="text-diva-dark">Idade adulta:</strong> Apresenta os sintomas acima mencionados de défice de atenção com maior intensidade ou com mais frequência do que as outras pessoas?
+            </p>
+            <div class="flex items-center gap-4">
+              <label class="inline-flex items-center gap-2 cursor-pointer font-semibold">
+                <input type="checkbox" id="compA_adult_sim" onchange="setComplementA('A', 'adult', 'Sim')" class="diva-checkbox" />
+                <span>Sim</span>
+              </label>
+              <span class="text-slate-400">/</span>
+              <label class="inline-flex items-center gap-2 cursor-pointer font-semibold">
+                <input type="checkbox" id="compA_adult_nao" onchange="setComplementA('A', 'adult', 'Não')" class="diva-checkbox" />
+                <span>Não</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <p class="text-slate-800">
+              <strong class="text-diva-dark">Infância:</strong> Apresentava os sintomas acima mencionados de défice de atenção com maior intensidade ou com mais frequência do que as outras crianças da sua idade?
+            </p>
+            <div class="flex items-center gap-4">
+              <label class="inline-flex items-center gap-2 cursor-pointer font-semibold">
+                <input type="checkbox" id="compA_child_sim" onchange="setComplementA('A', 'child', 'Sim')" class="diva-checkbox" />
+                <span>Sim</span>
+              </label>
+              <span class="text-slate-400">/</span>
+              <label class="inline-flex items-center gap-2 cursor-pointer font-semibold">
+                <input type="checkbox" id="compA_child_nao" onchange="setComplementA('A', 'child', 'Não')" class="diva-checkbox" />
+                <span>Não</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navegação de Rodapé -->
+      <div class="flex items-center justify-between pt-2">
+        <button onclick="switchTab(1)" class="px-4 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 text-sm font-medium transition">
+          <i class="fa-solid fa-arrow-left mr-1.5"></i> Identificação do Paciente
+        </button>
+        <button onclick="switchTab(3)" class="bg-diva-dark hover:bg-diva-darker text-white px-6 py-2.5 rounded-xl text-sm font-semibold shadow transition">
+          Avançar para Parte 2 (Hiperactividade-Impulsividade) <i class="fa-solid fa-arrow-right ml-1.5"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         ABA 3: PARTE 2 – HIPERACTIVIDADE-IMPULSIVIDADE (H/I 1 a H/I 9)
+         ========================================== -->
+    <section id="tabPanel-3" class="tab-panel hidden space-y-6">
+      <!-- Cabeçalho Coral -->
+      <div class="bg-diva-coral text-white px-6 py-4 rounded-xl shadow-sm flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-extrabold tracking-tight">Parte 2: Sintomas de hiperactividade-impulsividade (DSM-IV critério A2)</h2>
+          <p class="text-xs sm:text-sm text-white/95 mt-1">
+            <strong>Instruções:</strong> os sintomas na idade adulta têm que se manifestar pelo menos há seis meses. Os sintomas na infância referem-se à idade entre os 5 e os 12 anos. Para ser atribuído um sintoma à PHDA, este tem que ter um curso crónico e não episódico.
+          </p>
+        </div>
+        <div class="bg-white/15 backdrop-blur px-4 py-2 rounded-lg text-right flex-shrink-0">
+          <div class="text-[11px] uppercase tracking-wider font-semibold text-white/90">Total Critério A2 (H/I)</div>
+          <div id="part2BannerCounter" class="text-sm font-extrabold">Adulta: 0/9 • Infância: 0/9</div>
+        </div>
+      </div>
+
+      <!-- Navegação Rápida H/I 1 - H/I 9 -->
+      <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-2 sticky top-[104px] z-20">
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span class="text-xs font-bold text-slate-500 mr-1">Ir para:</span>
+          <div id="quickNavHI" class="flex flex-wrap gap-1.5"></div>
+        </div>
+        <span class="text-xs text-slate-500 hidden md:inline">Assinale os exemplos reconhecidos na idade adulta e na infância</span>
+      </div>
+
+      <!-- Contentor dos Cartões H/I 1 a H/I 9 -->
+      <div id="criteriaContainerHI" class="space-y-6"></div>
+
+      <!-- Complemento Critério A (Parte 2) -->
+      <div class="bg-white rounded-xl shadow-sm border-2 border-diva-dark overflow-hidden">
+        <div class="bg-diva-dark text-white px-6 py-3 font-extrabold text-base">
+          Complemento critério A (Hiperactividade-Impulsividade)
+        </div>
+        <div class="p-6 space-y-4 text-sm">
+          <div class="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-slate-100">
+            <p class="text-slate-800">
+              <strong class="text-diva-dark">Idade adulta:</strong> Apresenta os sintomas acima mencionados de hiperactividade/impulsividade com maior intensidade ou com mais frequência do que as outras pessoas?
+            </p>
+            <div class="flex items-center gap-4">
+              <label class="inline-flex items-center gap-2 cursor-pointer font-semibold">
+                <input type="checkbox" id="compHI_adult_sim" onchange="setComplementA('HI', 'adult', 'Sim')" class="diva-checkbox" />
+                <span>Sim</span>
+              </label>
+              <span class="text-slate-400">/</span>
+              <label class="inline-flex items-center gap-2 cursor-pointer font-semibold">
+                <input type="checkbox" id="compHI_adult_nao" onchange="setComplementA('HI', 'adult', 'Não')" class="diva-checkbox" />
+                <span>Não</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <p class="text-slate-800">
+              <strong class="text-diva-dark">Infância:</strong> Apresentava os sintomas acima mencionados de hiperactividade/impulsividade com maior intensidade ou com maior frequência do que as outras crianças da sua idade?
+            </p>
+            <div class="flex items-center gap-4">
+              <label class="inline-flex items-center gap-2 cursor-pointer font-semibold">
+                <input type="checkbox" id="compHI_child_sim" onchange="setComplementA('HI', 'child', 'Sim')" class="diva-checkbox" />
+                <span>Sim</span>
+              </label>
+              <span class="text-slate-400">/</span>
+              <label class="inline-flex items-center gap-2 cursor-pointer font-semibold">
+                <input type="checkbox" id="compHI_child_nao" onchange="setComplementA('HI', 'child', 'Não')" class="diva-checkbox" />
+                <span>Não</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navegação de Rodapé -->
+      <div class="flex items-center justify-between pt-2">
+        <button onclick="switchTab(2)" class="px-4 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 text-sm font-medium transition">
+          <i class="fa-solid fa-arrow-left mr-1.5"></i> Parte 1 (Défice de Atenção)
+        </button>
+        <button onclick="switchTab(4)" class="bg-diva-dark hover:bg-diva-darker text-white px-6 py-2.5 rounded-xl text-sm font-semibold shadow transition">
+          Avançar para Parte 3 (Disfunção Devido aos Sintomas) <i class="fa-solid fa-arrow-right ml-1.5"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         ABA 4: PARTE 3 – DISFUNÇÃO DEVIDO AOS SINTOMAS (B, C, D)
+         ========================================== -->
+    <section id="tabPanel-4" class="tab-panel hidden space-y-6">
+      <!-- Cabeçalho Coral -->
+      <div class="bg-diva-coral text-white px-6 py-4 rounded-xl shadow-sm">
+        <h2 class="text-xl font-extrabold tracking-tight">Parte 3: Disfunção devido aos sintomas (DSM-IV critérios B, C e D)</h2>
+        <p class="text-xs sm:text-sm text-white/95 mt-1">
+          Avaliação da idade de início dos sintomas e dos 5 contextos da vida quotidiana na idade adulta e na infância.
+        </p>
+      </div>
+
+      <!-- Critério B -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="bg-diva-dark text-white px-6 py-3 font-extrabold text-base">
+          Critério B
+        </div>
+        <div class="p-6 space-y-4 text-sm">
+          <p class="font-semibold text-slate-800">
+            Sempre apresentou os sintomas acima mencionados de défice de atenção e/ou hiperactividade/impulsividade?
+          </p>
+          <div class="space-y-3">
+            <label class="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" id="critB_sim" onchange="setCritB('Sim')" class="diva-checkbox" />
+              <span class="text-slate-800 font-medium">Sim (alguns sintomas já estavam presente antes dos sete anos de idade)</span>
+            </label>
+            <div class="flex flex-wrap items-center gap-3">
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" id="critB_nao" onchange="setCritB('Não')" class="diva-checkbox" />
+                <span class="text-slate-800 font-medium">Não</span>
+              </label>
+              <div class="flex items-center gap-2 text-slate-700 ml-2">
+                <span>Se respondeu não, o início dos sintomas foi a partir dos</span>
+                <input type="number" id="critB_age" min="1" max="99" oninput="updateCritBAge(this.value)" placeholder="--" class="w-20 px-3 py-1.5 rounded-lg border-2 border-diva-border bg-diva-lighter/40 focus:bg-white focus:border-diva-dark text-center font-bold text-sm" />
+                <span>anos de idade.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Critério C Header + Contextos Dinâmicos -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="bg-diva-dark text-white px-6 py-3 flex flex-wrap items-center justify-between gap-2">
+          <span class="font-extrabold text-base">Critério C</span>
+          <span id="critCContextCounter" class="text-xs bg-white/20 px-3 py-1 rounded-full font-semibold">
+            Contextos ativos: Adulta 0/5 • Infância 0/5
+          </span>
+        </div>
+        <div class="p-6 border-b border-slate-100 bg-slate-50">
+          <p class="text-sm font-semibold text-slate-800">
+            Em que contextos de vida são, ou foram, causadores de disfunção os sintomas acima mencionados?
+          </p>
+        </div>
+        <div id="contextsContainerC" class="divide-y divide-slate-200"></div>
+      </div>
+
+      <!-- Conclusão do Critério C / D (Existe disfunção em >= 2 contextos?) -->
+      <div class="bg-white rounded-xl shadow-sm border-2 border-diva-dark overflow-hidden">
+        <div class="grid grid-cols-1 md:grid-cols-12 items-center">
+          <div class="md:col-span-7 bg-diva-dark text-white p-6 space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-sm sm:text-base">Idade adulta: <span class="font-normal">Existe disfunção em ≥ 2 contextos?</span></span>
+              <span id="adultContextsCountBadge" class="text-xs bg-white/20 px-2.5 py-0.5 rounded-full">0 contextos marcados</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-sm sm:text-base">Infância: <span class="font-normal">Existe disfunção em ≥ 2 contextos?</span></span>
+              <span id="childContextsCountBadge" class="text-xs bg-white/20 px-2.5 py-0.5 rounded-full">0 contextos marcados</span>
+            </div>
+          </div>
+          <div class="md:col-span-5 p-6 space-y-4 bg-white">
+            <div class="flex items-center gap-6">
+              <label class="inline-flex items-center gap-2 cursor-pointer font-semibold text-sm">
+                <input type="checkbox" id="dysfAdult_sim" onchange="setDysfunctionThreshold('adult', 'Sim')" class="diva-checkbox" />
+                <span>Sim</span>
+              </label>
+              <span class="text-slate-400">/</span>
+              <label class="inline-flex items-center gap-2 cursor-pointer font-semibold text-sm">
+                <input type="checkbox" id="dysfAdult_nao" onchange="setDysfunctionThreshold('adult', 'Não')" class="diva-checkbox" />
+                <span>Não</span>
+              </label>
+            </div>
+            <div class="flex items-center gap-6">
+              <label class="inline-flex items-center gap-2 cursor-pointer font-semibold text-sm">
+                <input type="checkbox" id="dysfChild_sim" onchange="setDysfunctionThreshold('child', 'Sim')" class="diva-checkbox" />
+                <span>Sim</span>
+              </label>
+              <span class="text-slate-400">/</span>
+              <label class="inline-flex items-center gap-2 cursor-pointer font-semibold text-sm">
+                <input type="checkbox" id="dysfChild_nao" onchange="setDysfunctionThreshold('child', 'Não')" class="diva-checkbox" />
+                <span>Não</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fim da entrevista / Quaisquer pormenores -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-3">
+        <p class="font-bold text-sm text-slate-900">Fim da entrevista. Proceda agora ao resumo.</p>
+        <label for="interviewDetails" class="block text-sm font-medium text-slate-700">Quaisquer pormenores:</label>
+        <textarea id="interviewDetails" rows="4" oninput="updateGeneralNotes(this.value)" placeholder="Registe aqui observações clínicas, contexto adicional da anamnese ou pormenores relevantes..." class="w-full p-4 rounded-xl border-2 border-diva-border bg-diva-lighter/20 focus:bg-white focus:border-diva-dark focus:outline-none text-sm transition"></textarea>
+      </div>
+
+      <!-- Navegação de Rodapé -->
+      <div class="flex items-center justify-between pt-2">
+        <button onclick="switchTab(3)" class="px-4 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 text-sm font-medium transition">
+          <i class="fa-solid fa-arrow-left mr-1.5"></i> Parte 2 (Hiperactividade-Impulsividade)
+        </button>
+        <button onclick="switchTab(5)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow transition">
+          Ver Resumo de Sintomas e Folha de Cotação <i class="fa-solid fa-check-double ml-1.5"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         ABA 5: RESUMO DE SINTOMAS, COTAÇÃO & EXPORTAÇÃO
+         ========================================== -->
+    <section id="tabPanel-5" class="tab-panel hidden space-y-8">
+      <!-- Barra de Ferramentas de Exportação e Impressão -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-extrabold text-diva-dark flex items-center gap-2">
+            <i class="fa-solid fa-file-medical-alt"></i>
+            <span>Centro de Relatório, Cotação e Exportação</span>
+          </h2>
+          <p class="text-xs text-slate-500">Páginas 18 e 19 do protocolo oficial DIVA 2.0 • Cálculo em tempo real</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5">
+          <button onclick="copyClinicalSummary()" class="bg-diva-dark hover:bg-diva-darker text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition">
+            <i class="fa-regular fa-copy"></i>
+            <span>Copiar Resumo Clínico</span>
+          </button>
+
+          <button onclick="printReport('summary')" class="bg-sky-600 hover:bg-sky-700 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition">
+            <i class="fa-solid fa-print"></i>
+            <span>Imprimir / PDF (Resumo + Cotação)</span>
+          </button>
+
+          <button onclick="printReport('full')" class="bg-slate-700 hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition">
+            <i class="fa-solid fa-file-pdf"></i>
+            <span>Imprimir Entrevista Completa</span>
+          </button>
+
+          <button onclick="downloadMarkdownReport()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition">
+            <i class="fa-solid fa-download"></i>
+            <span>Exportar .MD / .TXT</span>
+          </button>
+
+          <button onclick="exportJsonData()" class="border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs sm:text-sm font-medium px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 transition" title="Guardar ficheiro de dados JSON">
+            <i class="fa-solid fa-file-code"></i>
+            <span>JSON</span>
+          </button>
+
+          <label class="border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs sm:text-sm font-medium px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer transition" title="Importar ficheiro JSON anteriormente exportado">
+            <i class="fa-solid fa-upload"></i>
+            <span>Importar</span>
+            <input type="file" accept=".json" onchange="importJsonData(event)" class="hidden" />
+          </label>
+        </div>
+      </div>
+
+      <!-- Seletor do Limiar Clínico na Idade Adulta (Nota de Rodapé *) -->
+      <div class="bg-diva-lighter border border-diva-border rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
+        <div class="space-y-0.5">
+          <div class="text-sm font-bold text-diva-dark flex items-center gap-2">
+            <i class="fa-solid fa-sliders"></i>
+            <span>Critério de Ponto de Corte na Idade Adulta (Nota de Rodapé *)</span>
+          </div>
+          <p class="text-xs text-slate-600">
+            Na infância o critério é sempre ≥ 6 características. Na idade adulta pode optar entre o limiar de investigação clínica validado na DIVA 2.0 (≥ 4 sintomas*) ou o limiar estrito DSM-IV-TR (≥ 6 sintomas).
+          </p>
+        </div>
+        <div class="flex items-center bg-white p-1 rounded-lg border border-slate-300 text-xs font-semibold">
+          <button id="cutoffBtn4" onclick="setAdultCutoff(4)" class="px-3 py-1.5 rounded-md transition">
+            ≥ 4 Sintomas em Adulto (Recomendado *)
+          </button>
+          <button id="cutoffBtn6" onclick="setAdultCutoff(6)" class="px-3 py-1.5 rounded-md transition">
+            ≥ 6 Sintomas em Adulto (Estrito DSM-IV)
+          </button>
+        </div>
+      </div>
+
+      <!-- PÁGINA 18: TABELA DE RESUMO DE SINTOMAS A e HI -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="bg-diva-coral text-white px-6 py-3.5">
+          <h3 class="text-lg font-extrabold">Resumo de Sintomas A e HI</h3>
+        </div>
+        <div class="p-6 space-y-4">
+          <p class="text-base font-bold text-diva-dark">
+            Indique quais os critérios que foram marcados na parte 1 e 2 e some-os
+          </p>
+
+          <div class="overflow-x-auto border border-diva-dark rounded-lg">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+              <thead>
+                <tr class="bg-diva-dark text-white">
+                  <th class="py-3 px-3 border-r border-white/20 w-24">Critério<br/>DSM-IV TR</th>
+                  <th class="py-3 px-4 border-r border-white/20">Sintoma</th>
+                  <th class="py-3 px-3 border-r border-white/20 w-32 text-center">Presente na<br/>idade adulta</th>
+                  <th class="py-3 px-3 w-32 text-center">Presente na<br/>infância</th>
+                </tr>
+              </thead>
+              <tbody id="summaryTableBody" class="divide-y divide-diva-dark/30">
+                <!-- Preenchido dinamicamente por JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PÁGINA 19: FOLHA DE COTAÇÃO -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="bg-diva-coral text-white px-6 py-3.5 flex items-center justify-between">
+          <h3 class="text-lg font-extrabold">Folha de Cotação</h3>
+          <span class="text-xs bg-white/20 px-2.5 py-1 rounded-full font-semibold">Página 19</span>
+        </div>
+
+        <div class="p-6 space-y-6">
+          <div class="overflow-x-auto border border-diva-dark rounded-lg">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+              <tbody class="divide-y divide-diva-dark">
+                <!-- DSM-IV critério A -->
+                <tr>
+                  <td class="bg-[#7CC6F2]/50 font-bold text-slate-900 p-4 w-44 align-top border-r border-diva-dark">
+                    DSM-IV<br/>critério A
+                  </td>
+                  <td class="p-4 align-top border-r border-diva-dark space-y-4">
+                    <div>
+                      <div class="font-bold text-slate-900 mb-1">Infância</div>
+                      <div class="py-0.5">total de características A é ≥ 6?</div>
+                      <div class="py-0.5">total de características H/I é ≥ 6?</div>
+                    </div>
+                    <div>
+                      <div class="font-bold text-slate-900 mb-1">Idade adulta*</div>
+                      <div class="py-0.5" id="labelScoringAdultA">total de características A é ≥ 4 (ou ≥ 6)?</div>
+                      <div class="py-0.5" id="labelScoringAdultHI">total de características H/I é ≥ 4 (ou ≥ 6)?</div>
+                    </div>
+                  </td>
+                  <td class="p-4 align-top w-80 space-y-4">
+                    <div class="space-y-1.5 pt-5">
+                      <div class="flex items-center gap-4">
+                        <label class="inline-flex items-center gap-1.5"><input type="checkbox" id="score_childA_sim" disabled class="diva-checkbox" /><span>Sim</span></label>
+                        <span>/</span>
+                        <label class="inline-flex items-center gap-1.5"><input type="checkbox" id="score_childA_nao" disabled class="diva-checkbox" /><span>Não</span></label>
+                      </div>
+                      <div class="flex items-center gap-4">
+                        <label class="inline-flex items-center gap-1.5"><input type="checkbox" id="score_childHI_sim" disabled class="diva-checkbox" /><span>Sim</span></label>
+                        <span>/</span>
+                        <label class="inline-flex items-center gap-1.5"><input type="checkbox" id="score_childHI_nao" disabled class="diva-checkbox" /><span>Não</span></label>
+                      </div>
+                    </div>
+                    <div class="space-y-1.5 pt-5">
+                      <div class="flex items-center gap-4">
+                        <label class="inline-flex items-center gap-1.5"><input type="checkbox" id="score_adultA_sim" disabled class="diva-checkbox" /><span>Sim</span></label>
+                        <span>/</span>
+                        <label class="inline-flex items-center gap-1.5"><input type="checkbox" id="score_adultA_nao" disabled class="diva-checkbox" /><span>Não</span></label>
+                      </div>
+                      <div class="flex items-center gap-4">
+                        <label class="inline-flex items-center gap-1.5"><input type="checkbox" id="score_adultHI_sim" disabled class="diva-checkbox" /><span>Sim</span></label>
+                        <span>/</span>
+                        <label class="inline-flex items-center gap-1.5"><input type="checkbox" id="score_adultHI_nao" disabled class="diva-checkbox" /><span>Não</span></label>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- DSM-IV critério B -->
+                <tr>
+                  <td class="bg-[#7CC6F2]/50 font-bold text-slate-900 p-4 align-top border-r border-diva-dark">
+                    DSM-IV<br/>critério B
+                  </td>
+                  <td class="p-4 align-top border-r border-diva-dark">
+                    Há indicações de se tratar de um padrão crónico de sintomas e de disfunção?
+                  </td>
+                  <td class="p-4 align-top">
+                    <div class="flex items-center gap-4">
+                      <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" id="score_critB_sim" onchange="setScoreSheetField('chronicPattern', 'Sim')" class="diva-checkbox" />
+                        <span>Sim</span>
+                      </label>
+                      <span>/</span>
+                      <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" id="score_critB_nao" onchange="setScoreSheetField('chronicPattern', 'Não')" class="diva-checkbox" />
+                        <span>Não</span>
+                      </label>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- DSM-IV critério C e D -->
+                <tr>
+                  <td class="bg-[#7CC6F2]/50 font-bold text-slate-900 p-4 align-top border-r border-diva-dark">
+                    DSM-IV<br/>critério C e D
+                  </td>
+                  <td class="p-4 align-top border-r border-diva-dark space-y-2">
+                    <p>Os sintomas e as perturbações manifestam-se em pelo menos dois contextos da vida do dia a dia</p>
+                    <div class="pt-1 space-y-1 font-medium">
+                      <div>Idade adulta</div>
+                      <div>Infância</div>
+                    </div>
+                  </td>
+                  <td class="p-4 align-top space-y-1.5 pt-11">
+                    <div class="flex items-center gap-4">
+                      <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" id="score_critCD_adult_sim" onchange="setDysfunctionThreshold('adult', 'Sim')" class="diva-checkbox" />
+                        <span>Sim</span>
+                      </label>
+                      <span>/</span>
+                      <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" id="score_critCD_adult_nao" onchange="setDysfunctionThreshold('adult', 'Não')" class="diva-checkbox" />
+                        <span>Não</span>
+                      </label>
+                    </div>
+                    <div class="flex items-center gap-4">
+                      <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" id="score_critCD_child_sim" onchange="setDysfunctionThreshold('child', 'Sim')" class="diva-checkbox" />
+                        <span>Sim</span>
+                      </label>
+                      <span>/</span>
+                      <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" id="score_critCD_child_nao" onchange="setDysfunctionThreshold('child', 'Não')" class="diva-checkbox" />
+                        <span>Não</span>
+                      </label>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- DSM-IV critério E -->
+                <tr>
+                  <td class="bg-[#7CC6F2]/50 font-bold text-slate-900 p-4 align-top border-r border-diva-dark">
+                    DSM-IV<br/>critério E
+                  </td>
+                  <td class="p-4 align-top border-r border-diva-dark">
+                    Os sintomas não podem ser melhor explicados pela presença de uma outra perturbação psiquiátrica
+                  </td>
+                  <td class="p-4 align-top space-y-3">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" id="score_critE_nao" onchange="setScoreSheetField('otherDisorder', 'Não')" class="diva-checkbox" />
+                      <span>Não <span class="text-xs text-slate-500">(não são melhor explicados por outra perturbação)</span></span>
+                    </label>
+                    <div class="space-y-1.5">
+                      <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="score_critE_sim" onchange="setScoreSheetField('otherDisorder', 'Sim')" class="diva-checkbox" />
+                        <span>Sim, por:</span>
+                      </label>
+                      <input type="text" id="score_critE_text" oninput="updateScoreSheetText('otherDisorderText', this.value)" placeholder="Especificar perturbação psiquiátrica..." class="w-full px-3 py-1.5 rounded border-2 border-diva-border bg-diva-lighter/30 focus:bg-white focus:border-diva-dark text-xs" />
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Hetero-anamnese -->
+                <tr>
+                  <td class="bg-[#7CC6F2]/50 font-bold text-slate-900 p-4 align-top border-r border-diva-dark">
+                    &nbsp;
+                  </td>
+                  <td class="p-4 align-top border-r border-diva-dark space-y-4">
+                    <div class="font-semibold text-slate-900">O diagnóstico é confirmado por hetero-anamnese?</div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span>Pais/irmão/irmã/outros, nomeadamente</span>
+                      <input type="text" id="hetero_parents_text" oninput="updateScoreSheetText('heteroParentsName', this.value)" placeholder="Quem esteve presente" class="px-2.5 py-1 rounded border-2 border-diva-border bg-diva-lighter/30 text-xs w-44" />
+                      <span>**</span>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span>Parceiro(a)/bom amigo(a)/outros</span>
+                      <input type="text" id="hetero_partner_text" oninput="updateScoreSheetText('heteroPartnerName', this.value)" placeholder="Quem esteve presente" class="px-2.5 py-1 rounded border-2 border-diva-border bg-diva-lighter/30 text-xs w-44" />
+                      <span>**</span>
+                    </div>
+
+                    <div class="pt-1">Relatórios escolares</div>
+
+                    <div class="text-xs text-slate-600 pt-2 space-y-0.5">
+                      <div>0 = sem/pouca confirmação</div>
+                      <div>1 = alguma confirmação</div>
+                      <div>2 = confirmação óbvia</div>
+                    </div>
+                  </td>
+                  <td class="p-4 align-top space-y-4 pt-11">
+                    <!-- Parents score -->
+                    <div class="flex items-center gap-3 flex-wrap">
+                      <label class="inline-flex items-center gap-1 cursor-pointer"><input type="checkbox" id="hetero_parents_NA" onchange="setHeteroScore('parents', 'N/A')" class="diva-checkbox" /><span>N/A</span></label>
+                      <label class="inline-flex items-center gap-1 cursor-pointer"><input type="checkbox" id="hetero_parents_0" onchange="setHeteroScore('parents', '0')" class="diva-checkbox" /><span>0</span></label>
+                      <label class="inline-flex items-center gap-1 cursor-pointer"><input type="checkbox" id="hetero_parents_1" onchange="setHeteroScore('parents', '1')" class="diva-checkbox" /><span>1</span></label>
+                      <label class="inline-flex items-center gap-1 cursor-pointer"><input type="checkbox" id="hetero_parents_2" onchange="setHeteroScore('parents', '2')" class="diva-checkbox" /><span>2</span></label>
+                    </div>
+
+                    <!-- Partner score -->
+                    <div class="flex items-center gap-3 flex-wrap">
+                      <label class="inline-flex items-center gap-1 cursor-pointer"><input type="checkbox" id="hetero_partner_NA" onchange="setHeteroScore('partner', 'N/A')" class="diva-checkbox" /><span>N/A</span></label>
+                      <label class="inline-flex items-center gap-1 cursor-pointer"><input type="checkbox" id="hetero_partner_0" onchange="setHeteroScore('partner', '0')" class="diva-checkbox" /><span>0</span></label>
+                      <label class="inline-flex items-center gap-1 cursor-pointer"><input type="checkbox" id="hetero_partner_1" onchange="setHeteroScore('partner', '1')" class="diva-checkbox" /><span>1</span></label>
+                      <label class="inline-flex items-center gap-1 cursor-pointer"><input type="checkbox" id="hetero_partner_2" onchange="setHeteroScore('partner', '2')" class="diva-checkbox" /><span>2</span></label>
+                    </div>
+
+                    <!-- School reports score -->
+                    <div class="flex items-center gap-3 flex-wrap">
+                      <label class="inline-flex items-center gap-1 cursor-pointer"><input type="checkbox" id="hetero_school_NA" onchange="setHeteroScore('school', 'N/A')" class="diva-checkbox" /><span>N/A</span></label>
+                      <label class="inline-flex items-center gap-1 cursor-pointer"><input type="checkbox" id="hetero_school_0" onchange="setHeteroScore('school', '0')" class="diva-checkbox" /><span>0</span></label>
+                      <label class="inline-flex items-center gap-1 cursor-pointer"><input type="checkbox" id="hetero_school_1" onchange="setHeteroScore('school', '1')" class="diva-checkbox" /><span>1</span></label>
+                      <label class="inline-flex items-center gap-1 cursor-pointer"><input type="checkbox" id="hetero_school_2" onchange="setHeteroScore('school', '2')" class="diva-checkbox" /><span>2</span></label>
+                    </div>
+
+                    <div class="space-y-1 pt-1">
+                      <label class="block text-xs font-medium text-slate-700">Explicação:</label>
+                      <textarea id="hetero_explanation" rows="3" oninput="updateScoreSheetText('heteroExplanation', this.value)" class="w-full p-2 rounded border-2 border-diva-border bg-diva-lighter/30 focus:bg-white focus:border-diva-dark text-xs"></textarea>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Diagnóstico PHDA*** -->
+                <tr>
+                  <td class="bg-[#7CC6F2]/50 font-bold text-slate-900 p-4 align-top border-r border-diva-dark">
+                    &nbsp;
+                  </td>
+                  <td class="p-4 align-top border-r border-diva-dark space-y-3">
+                    <div class="font-bold text-base text-slate-900">Diagnóstico PHDA***</div>
+                    <!-- Caixa de Assistente Clínico Automático -->
+                    <div id="diagnosticRationaleBox" class="p-3.5 rounded-xl border text-xs space-y-1.5">
+                      <!-- Preenchido dinamicamente -->
+                    </div>
+                  </td>
+                  <td class="p-4 align-top space-y-2.5">
+                    <label class="flex items-center gap-2 cursor-pointer font-medium">
+                      <input type="checkbox" id="diag_nao" onchange="setFinalDiagnosis('Não')" class="diva-checkbox" />
+                      <span>Não</span>
+                    </label>
+
+                    <div class="pt-1 font-semibold text-slate-800">Sim, subtipo</div>
+
+                    <label class="flex items-start gap-2 cursor-pointer">
+                      <input type="checkbox" id="diag_misto" onchange="setFinalDiagnosis('314.01 Subtipo misto')" class="diva-checkbox" />
+                      <span>314.01 Subtipo misto</span>
+                    </label>
+
+                    <label class="flex items-start gap-2 cursor-pointer">
+                      <input type="checkbox" id="diag_desatento" onchange="setFinalDiagnosis('314.00 Subtipo predominantemente desatento')" class="diva-checkbox" />
+                      <span>314.00 Subtipo predominantemente desatento</span>
+                    </label>
+
+                    <label class="flex items-start gap-2 cursor-pointer">
+                      <input type="checkbox" id="diag_hiperactivo" onchange="setFinalDiagnosis('314.01 Subtipo predominantemente hiperactivo/impulsivo')" class="diva-checkbox" />
+                      <span>314.01 Subtipo predominantemente hiperactivo/impulsivo</span>
+                    </label>
+
+                    <div class="pt-2">
+                      <button onclick="resetDiagnosisOverride()" id="resetDiagOverrideBtn" class="hidden text-[11px] text-diva-dark underline hover:text-diva-coral">
+                        Restaurar sugestão automática do algoritmo
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Notas de rodapé da Página 19 -->
+          <div class="text-xs text-slate-600 space-y-1 leading-relaxed pt-2">
+            <p>* Investigações mostram que na idade adulta a identificação de 4 ou mais características de défice de atenção e/ou hiperactividade/impulsividade são suficientes para o diagnóstico de PHDA. Kooij et al. Internal and external validity of Attention-Deficit Hyperactivity Disorder in a population-based sample of adults. Psychological Medicine 2005; 35(6):817-827. Barkley RA: Age dependent decline in ADHD: True recovery or statistical illusion? The ADHD Report 1997; 5:1-5.</p>
+            <p>** Indique quem esteve presente na hetero-anamnese.</p>
+            <p>*** Se os subtipos constatados na infância e na idade adulta diferem, o subtipo actual adulto prevalece no diagnóstico.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- CONTENTOR DEDICADO PARA IMPRESSÃO / PDF -->
+  <div id="printContainer" class="hidden print-only p-6 max-w-4xl mx-auto"></div>
+
+  <!-- ==========================================
+       MODAIS PERSONALIZADOS & NOTIFICAÇÃO TOAST
+       ========================================== -->
+  <!-- Modal de Confirmação de Nova Entrevista -->
+  <div id="resetModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
+      <div class="flex items-center gap-3 text-diva-coral">
+        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900">Iniciar Nova Entrevista?</h3>
+      </div>
+      <p class="text-sm text-slate-600 leading-relaxed">
+        Esta ação irá limpar todas as respostas, exemplos assinalados e dados do paciente atualmente guardados. Deseja prosseguir?
+      </p>
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button onclick="closeResetModal()" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 text-sm font-medium">
+          Cancelar
+        </button>
+        <button onclick="confirmResetAll()" class="px-4 py-2 rounded-lg bg-diva-coral hover:bg-diva-coralDark text-white text-sm font-semibold shadow-sm">
+          Sim, Limpar Tudo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Caso Clínico de Demonstração -->
+  <div id="demoModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
+      <div class="flex items-center gap-3 text-diva-dark">
+        <div class="w-10 h-10 rounded-full bg-diva-light flex items-center justify-center text-lg">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900">Carregar Caso Clínico de Exemplo?</h3>
+      </div>
+      <p class="text-sm text-slate-600 leading-relaxed">
+        Isto irá preencher o formulário com um caso clínico simulado completo para testar a cotação automática, a folha de resumo e a exportação de relatórios.
+      </p>
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button onclick="closeDemoModal()" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 text-sm font-medium">
+          Cancelar
+        </button>
+        <button onclick="confirmLoadDemo()" class="px-4 py-2 rounded-lg bg-diva-dark hover:bg-diva-darker text-white text-sm font-semibold shadow-sm">
+          Carregar Exemplo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notificação Toast -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none no-print">
+    <div class="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg border border-slate-700 flex items-center gap-3 text-sm">
+      <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+      <span id="toastMessage">Guardado com sucesso.</span>
+    </div>
+  </div>
+
+  <!-- Textarea oculta para cópia segura via execCommand('copy') -->
+  <textarea id="clipboardFallback" class="fixed -top-96 -left-96 opacity-0 pointer-events-none" readonly></textarea>
+
+  <!-- ==========================================
+       DADOS OFICIAIS & LÓGICA DA APLICAÇÃO
+       ========================================== -->
+  <script>
+    /**
+     * 1. REPOSITÓRIO DE DADOS OFICIAIS DIVA 2.0 (PORTUGUÊS)
+     */
+    const DIVA_CRITERIA_A = [
+      {
+        id: 'A1',
+        dsmCode: 'A1a',
+        question: 'Com frequência não presta atenção suficiente aos pormenores ou comete erros por descuido, no trabalho ou noutras actividades?',
+        subQuestion: 'Como era durante a infância?',
+        adultExamples: [
+          'Cometer erros por descuido',
+          'Ter de trabalhar devagar para evitar erros',
+          'Não ler as instruções com atenção',
+          'Não ser bom em trabalhos detalhados',
+          'Precisar de demasiado tempo para os pormenores',
+          'Perder-se nos pormenores',
+          'Trabalhar demasiado rápido e, por isso, cometer erros'
+        ],
+        childExamples: [
+          'Cometia erros por descuido nos trabalhos escolares',
+          'Cometia erros devido a uma leitura errada das perguntas',
+          'Deixava perguntas por responder, por não as ter lido bem',
+          'Deixava por responder as perguntas do verso da página nos exames',
+          'Os outros comentavam sobre o seu trabalho desleixado',
+          'Não revia as respostas dos trabalhos para casa',
+          'Precisava de demasiado tempo para os trabalhos de pormenor'
+        ]
+      },
+      {
+        id: 'A2',
+        dsmCode: 'A1b',
+        question: 'Com frequência tem dificuldade em manter-se concentrado durante a realização de tarefas ou actividades?',
+        subQuestion: 'Como era durante a infância?',
+        adultExamples: [
+          'Não conseguir manter a atenção nas tarefas durante muito tempo*',
+          'Distrair-se facilmente com as próprias associações/pensamentos',
+          'Ter dificuldade em ver um filme ou ler um livro até ao fim*',
+          'Perder facilmente o interesse*',
+          'Fazer perguntas sobre assuntos que já foram discutidos'
+        ],
+        childExamples: [
+          'Tinha dificuldade em prestar atenção aos trabalhos escolares',
+          'Tinha dificuldade em manter-se atento nos jogos*',
+          'Distraía-se facilmente',
+          'Tinha dificuldade em concentrar-se*',
+          'Precisava de um ambiente muito estruturado para não se distrair',
+          'Perdia rapidamente o interesse nas actividades*'
+        ],
+        adultFootnote: '* A não ser que o assunto seja considerado muito interessante (v.g. jogar no computador ou passatempos)',
+        childFootnote: '* A não ser que o assunto fosse considerado muito interessante (v.g. jogar no computador ou passatempos)'
+      },
+      {
+        id: 'A3',
+        dsmCode: 'A1c',
+        question: 'Com frequência parece não estar a ouvir, quando alguém lhe dirige a palavra?',
+        subQuestion: 'Como era durante a infância?',
+        adultExamples: [
+          'Estar a sonhar ou ausente',
+          'Ter dificuldade de concentrar-se numa conversa',
+          'Não saber do que se falou depois de uma conversa',
+          'Mudar frequentemente o assunto de uma conversa',
+          'Os outros dizerem que está com a cabeça noutro sítio'
+        ],
+        childExamples: [
+          'Não se lembrava do que os pais/professores diziam',
+          'Estava frequentemente a sonhar ou ausente',
+          'Ouvia apenas quando o olhavam nos olhos ou lhe levantavam voz',
+          'Com frequência precisava de ser chamado mais que uma vez',
+          'As perguntas precisavam de ser repetidas'
+        ]
+      },
+      {
+        id: 'A4',
+        dsmCode: 'A1d',
+        question: 'Com frequência não segue as instruções ou não termina as tarefas ou obrigações no trabalho?',
+        subQuestion: 'Como era durante a infância?',
+        adultExamples: [
+          'Fazer várias coisas ao mesmo tempo sem as acabar',
+          'Ter dificuldade de acabar as coisas quando já perderam a novidade',
+          'Necessitar de prazos para terminar as tarefas',
+          'Ter dificuldade em terminar tarefas administrativas',
+          'Ter dificuldade em seguir manuais de instruções'
+        ],
+        childExamples: [
+          'Tinha dificuldade em seguir a sequência das tarefas',
+          'Tinha dificuldade com enunciados que envolvessem vários passos',
+          'Não acabava as coisas',
+          'Não acabava ou não entregava os trabalhos para casa',
+          'Precisava de um ambiente muito estruturado para poder acabar as tarefas'
+        ]
+      },
+      {
+        id: 'A5',
+        dsmCode: 'A1e',
+        question: 'Com frequência tem dificuldade em organizar tarefas e actividades?',
+        subQuestion: 'Como era durante a infância?',
+        adultExamples: [
+          'Dificuldade de planear as tarefas diárias',
+          'A casa e/ou local de trabalho estão desarrumados',
+          'Planear demasiado ou planear de maneira ineficaz',
+          'Ter frequentemente dois marcações à mesma hora',
+          'Chegar atrasado',
+          'Não utilizar a agenda de maneira consistente',
+          'Ser inflexível, estar “agarrado” a esquemas',
+          'Pouco noção do tempo',
+          'Fazer esquemas e não os cumprir',
+          'Precisar de outras pessoas para estruturar as coisas'
+        ],
+        childExamples: [
+          'Tinha dificuldade em estar pronto à hora',
+          'Quarto/secretária ficavam desarrumados',
+          'Tinha dificuldade de brincar sozinho',
+          'Tinha dificuldade de planear as tarefas ou o trabalho de casa',
+          'Fazia várias coisas ao mesmo tempo',
+          'Chegava com frequência atrasado',
+          'Tinha pouca noção do tempo',
+          'Tinha dificuldade em entreter-se'
+        ]
+      },
+      {
+        id: 'A6',
+        dsmCode: 'A1f',
+        question: 'Com frequência evita, tem repulsa ou sente relutância em envolver-se em tarefas que requeiram um esforço mental mantido?',
+        subQuestion: 'Como era durante a infância?',
+        adultExamples: [
+          'Fazer primeiro o que é o mais fácil ou divertido',
+          'Adiar sucessivamente as tarefas entediantes ou árduas',
+          'Adiar as tarefas e, em consequência, não cumprir prazos',
+          'Evitar os trabalhos monótonos como, por exemplo, os de índole administrativa.',
+          'Não gostar de ler porque exige esforço mental',
+          'Evitar coisas que exigem muita concentração'
+        ],
+        childExamples: [
+          'Evitava ou detestava os trabalhos de casa',
+          'Lia poucos livros ou não gostava de ler por isso exigir esforço mental',
+          'Evitava coisas que exigiam muita concentração',
+          'Detestava disciplinas que exigiam muita concentração',
+          'Adiava sucessivamente tarefas entediantes ou árduas'
+        ]
+      },
+      {
+        id: 'A7',
+        dsmCode: 'A1g',
+        question: 'Com frequência perde objectos necessários para as tarefas ou actividades?',
+        subQuestion: 'Como era durante a infância?',
+        adultExamples: [
+          'Perder a carteira, as chaves ou a agenda',
+          'Deixar frequentemente coisas para trás',
+          'Perder papéis do trabalho',
+          'Perder muito tempo a procurar as coisas',
+          'Entrar em pânico quando outros mudam as coisas de lugar',
+          'Arrumar coisas no sítio errado',
+          'Perder listas, números de telefone, apontamentos'
+        ],
+        childExamples: [
+          'Perdia o caderno diário, as canetas, equipamentos de ginástica ou outras coisas',
+          'Perdia roupa, brinquedos ou trabalhos de casa',
+          'Perdia muito tempo a procurar as coisas',
+          'Entrava em pânico quando os outros mudavam as coisas de lugar',
+          'Recebia comentários dos pais/professores sobre o facto de perder as coisas'
+        ]
+      },
+      {
+        id: 'A8',
+        dsmCode: 'A1h',
+        question: 'Com frequência distrai-se facilmente com estímulos exteriores?',
+        subQuestion: 'Como era durante a infância?',
+        adultExamples: [
+          'Dificuldade em ignorar estímulos externos',
+          'Depois de se distrair tem dificuldade em voltar ao assunto',
+          'Distrair-se facilmente com barulhos ou com o que acontece à sua volta',
+          'Escutar as conversas dos outros',
+          'Dificuldade em filtrar/seleccionar informação'
+        ],
+        childExamples: [
+          'Durante as aulas olhava muitas vezes para fora da janela',
+          'Distraía-se facilmente com barulhos ou com o que acontecia à sua volta',
+          'Depois de se distrair, tinha dificuldade em voltar ao assunto'
+        ]
+      },
+      {
+        id: 'A9',
+        dsmCode: 'A1i',
+        question: 'Esquece-se com frequência das actividades do dia a dia?',
+        subQuestion: 'Como era durante a infância?',
+        adultExamples: [
+          'Esquecer-se das marcações/outras obrigações',
+          'Esquecer agenda, chaves, etc',
+          'Precisar, muitas vezes, de ser lembrado de marcações',
+          'Precisar de voltar a casa para ir buscar coisas esquecidas',
+          'Utilizar um método/rotina para não se esquecer das coisas',
+          'Esquecer-se de marcar ou de consultar a agenda'
+        ],
+        childExamples: [
+          'Esquecia-se de compromissos/marcações',
+          'Precisava, muitas vezes, de ser lembrado das coisas',
+          'A meio de uma tarefa esquecia-se do que era preciso fazer',
+          'Esquecia-se de levar o material escolar',
+          'Esquecia-se de coisas na escola ou em casa dos amigos'
+        ]
+      }
+    ];
+
+    const DIVA_CRITERIA_HI = [
+      {
+        id: 'HI1',
+        displayCode: 'H/I 1',
+        dsmCode: 'A2a',
+        question: 'Com frequência mexe de forma irrequieta as mãos e os pés ou remexe-se na cadeira quando está sentado?',
+        subQuestion: 'Como era durante a infância?',
+        adultExamples: [
+          'Dificuldade em ficar quieto/a sentado/a',
+          'Balançar as pernas',
+          'Bater com uma caneta ou brincar com qualquer coisa',
+          'Roer as unhas ou mexer no cabelo',
+          'Consegue controlar a inquietação motora, mas isso faz que fique ainda mais tenso/a'
+        ],
+        childExamples: [
+          'Os pais diziam muitas vezes para se ‘sentar quieto/a’ ou algo parecido',
+          'Balançava as pernas',
+          'Batia com a caneta ou brincava com qualquer coisa',
+          'Roía as unhas ou mexia no cabelo',
+          'Não conseguia ficar sentado/a normalmente numa cadeira',
+          'Conseguia controlar a inquietação motora mas isso fazia-o/a ficar ainda mais tenso/a'
+        ]
+      },
+      {
+        id: 'HI2',
+        displayCode: 'H/I 2',
+        dsmCode: 'A2b',
+        question: 'Com frequência levanta-se do lugar em situações em que é suposto permanecer sentado?',
+        subQuestion: 'Como era durante a infância?',
+        adultExamples: [
+          'Evitar reuniões, conferências, igreja, etc. por ter de ficar sentado',
+          'Preferir andar a pé do que ficar sentado',
+          'Não ficar parado por muito tempo, estar sempre em movimento',
+          'Ficar tenso por ter dificuldade em ficar quieto sentado',
+          'Inventar desculpas para poder andar de pé'
+        ],
+        childExamples: [
+          'Levantava-se muitas vezes durante as refeições ou nas aulas',
+          'Tinha imensa dificuldade em ficar sentado quieto nas aulas ou durante as refeições',
+          'Era chamado a atenção para ficar sentado',
+          'Inventava desculpas para poder andar de pé'
+        ]
+      },
+      {
+        id: 'HI3',
+        displayCode: 'H/I 3',
+        dsmCode: 'A2c',
+        question: 'Com frequência sente-se irrequieto?',
+        subQuestion: 'Como era durante a infância?',
+        adultExamples: [
+          'Sentir-se irrequieto ou agitado por dentro',
+          'Ter a sensação de precisar de estar ocupado',
+          'Ter dificuldade em relaxar'
+        ],
+        childExamples: [
+          'Estava sempre a correr',
+          'Subia aos móveis ou saltava em cima dos bancos',
+          'Subia às árvores',
+          'Sentia-se agitado por dentro'
+        ]
+      },
+      {
+        id: 'HI4',
+        displayCode: 'H/I 4',
+        dsmCode: 'A2d',
+        question: 'Com frequência tem dificuldade em dedicar-se tranquilamente a actividades de lazer?',
+        subQuestion: 'Como era durante a infância?',
+        adultExamples: [
+          'Falar durante actividades em que não é suposto isso acontecer',
+          'Em público tende a fazer-se salientar',
+          'Ser barulhento em várias situações',
+          'Ter dificuldade em fazer actividades sossegadamente',
+          'Ter dificuldade em falar baixo'
+        ],
+        childExamples: [
+          'Era barulhento durante os jogos ou durante as aulas',
+          'Não conseguia ver televisão ou filmes sossegadamente',
+          'Era repreendido para ficar mais quieto/sossegado',
+          'Em público tendia a fazer-se salientar'
+        ]
+      },
+      {
+        id: 'HI5',
+        displayCode: 'H/I 5',
+        dsmCode: 'A2e',
+        question: 'Com frequência “anda a mil” ou age como se estivesse “ligado a um motor”?',
+        subQuestion: 'Como era durante a infância?',
+        adultExamples: [
+          'Estar sempre em acção',
+          'Ter muita energia, nunca parar',
+          'Ir para além dos próprios limites',
+          'Ter dificuldade em “deixar as coisas correr”, andar sempre “no ir”'
+        ],
+        childExamples: [
+          'Estava sempre ocupado',
+          'Era invulgarmente activo na escola ou em casa',
+          'Tinha energia em excesso',
+          'Estava “sempre a puxar”, sempre “no ir”'
+        ]
+      },
+      {
+        id: 'HI6',
+        displayCode: 'H/I 6',
+        dsmCode: 'A2f',
+        question: 'Com frequência fala excessivamente?',
+        subQuestion: 'Como era durante a infância?',
+        adultExamples: [
+          'Falar de maneira tão agitada que os outros o acham cansativo',
+          'Ter fama de ser muito falador',
+          'Ter dificuldade em parar de falar',
+          'Ter a tendência de falar excessivamente',
+          'Não deixar falar os outros numa conversa',
+          'Precisar de muitas palavras para dizer qualquer coisa'
+        ],
+        childExamples: [
+          'Tinha fama de ser tagarela',
+          'Os professores e os pais mandavam-no frequentemente calar',
+          'Nos relatórios da escola tinha comentários acerca de falar demasiado',
+          'Era castigado por falar demasiado',
+          'Distraía os outros com conversas, quando faziam os trabalhos escolares',
+          'Não deixava os outros falar durante as conversas'
+        ]
+      },
+      {
+        id: 'HI7',
+        displayCode: 'H/I 7',
+        dsmCode: 'A2g',
+        question: 'Com frequência precipita as respostas antes que as perguntas tenham acabado?',
+        subQuestion: 'Como era durante a infância?',
+        adultExamples: [
+          'Falar impulsivamente, falar sem pensar',
+          'Dizer o que lhe vem à cabeça',
+          'Responder sem deixar acabar a frase',
+          'Completar as frases das outras pessoas',
+          'Não ter discernimento'
+        ],
+        childExamples: [
+          'Falava impulsivamente, falava sem pensar no que dizia',
+          'Queria ser o primeiro a responder às perguntas na escola',
+          'Dizia a primeira resposta que lhe vinha à cabeça, mesmo que estivesse errada',
+          'Interrompia os outros antes de acabarem a frase',
+          'Parecia não ter discernimento'
+        ]
+      },
+      {
+        id: 'HI8',
+        displayCode: 'H/I 8',
+        dsmCode: 'A2h',
+        question: 'Com frequência tem dificuldade em esperar pela sua vez?',
+        subQuestion: 'Como era durante a infância?',
+        adultExamples: [
+          'Ter dificuldade em esperar nas filas e passar à frente das pessoas',
+          'Dificuldade em manter a calma no trânsito e em esperar pacientemente nas filas de trânsito',
+          'Dificuldade em esperar pela sua vez nas conversas',
+          'Ser impaciente',
+          'Iniciar subitamente relações e/ou empregos, ou deixá-los subitamente, por impaciência'
+        ],
+        childExamples: [
+          'Tinha dificuldade em esperar pela sua vez nos desportos/jogos/brincadeiras',
+          'Tinha dificuldade em esperar pela sua vez na turma',
+          'Queria ser sempre o primeiro',
+          'Ficava impaciente com facilidade',
+          'Atravessava a rua sem olhar'
+        ]
+      },
+      {
+        id: 'HI9',
+        displayCode: 'H/I 9',
+        dsmCode: 'A2i',
+        question: 'Com frequência interrompe ou interfere nas actividades dos outros?',
+        subQuestion: 'Como era durante a infância?',
+        adultExamples: [
+          'Intrometer-se facilmente nos assuntos dos outros',
+          'Interromper os outros',
+          'Interromper as pessoas nas suas actividades sem pedir licença',
+          'Comentários dos outros sobre ser intrometido',
+          'Dificuldade em respeitar os limites dos outros',
+          'Ter uma opinião sobre tudo e exprimi-la imediatamente'
+        ],
+        childExamples: [
+          'Intrometia-se nos jogos dos outros',
+          'Interrompia as conversas dos outros',
+          'Reagia a tudo',
+          'Não era capaz de esperar'
+        ]
+      }
+    ];
+
+    const DIVA_CONTEXTS_C = [
+      {
+        id: 'ctx1',
+        adultTitle: 'Vida profissional/académica',
+        childTitle: 'Vida académica',
+        adultExamples: [
+          'As formação(ões) necessárias para o trabalho não foram concluídas',
+          'Ter emprego abaixo do grau de formação',
+          'Ficar farto facilmente num posto de trabalho',
+          'Padrão de vários empregos temporários',
+          'Dificuldade em realizar tarefas administrativas/planear',
+          'Não conseguir ser promovido',
+          'Render abaixo das suas capacidades no trabalho',
+          'Sair do emprego/ser despedido por causa de uma discussão',
+          'Encontrar-se de baixa médica (prolongada) devido às incapacidades provocadas pelos sintomas',
+          'Disfunção moderada por compensar com um QI elevado',
+          'Disfunção moderada por compensar com apoio de estrutura externa'
+        ],
+        childExamples: [
+          'Grau mais baixo de formação do que o QI faria esperar',
+          'Repetições de ano devido a problemas de concentração',
+          'Formação não concluída/desistiu da escola',
+          'Precisou de muito mais tempo que o normal para terminar a formação',
+          'Conseguiu uma formação adequada ao QI com muita dificuldade',
+          'Tinha dificuldade em fazer os trabalhos de casa',
+          'Frequentou o ensino especial devido aos sintomas',
+          'Recebia comentários dos professores sobre comportamento/concentração',
+          'Disfunção moderada por compensar com um QI elevado',
+          'Disfunção moderada por ter tido apoio de estrutura externa'
+        ]
+      },
+      {
+        id: 'ctx2',
+        adultTitle: 'Relações e/ou vida familiar',
+        childTitle: 'Vida familiar',
+        adultExamples: [
+          'Ficar facilmente aborrecido nas relações',
+          'Impulsivamente começar/romper relações',
+          'Relação desequilibrada devido aos sintomas',
+          'Problemas de relacionamento, várias discussões, falta de intimidade',
+          'Divorciado devido aos sintomas',
+          'Problemas com a sexualidade devido aos sintomas',
+          'Dificuldade na educação dos filhos, resultantes dos sintomas',
+          'Dificuldade nas tarefas domésticas e/ou de administração',
+          'Problemas financeiros/jogar a dinheiro',
+          'Ter medo de começar uma relação'
+        ],
+        childExamples: [
+          'Discutia frequentemente com os irmãos/irmãs',
+          'Era frequentemente castigado ou sovado',
+          'Tinha pouco contacto com a família devido a conflitos',
+          'Precisou de ter a vida organizada pelos pais durante mais tempo do que o que seria normal'
+        ]
+      },
+      {
+        id: 'ctx3',
+        adultTitle: 'Interacção social',
+        childTitle: 'Interacção social',
+        adultExamples: [
+          'Ficar rapidamente aborrecido nos contactos sociais',
+          'Dificuldade em manter contactos sociais',
+          'Conflitos devido a problemas de comunicação',
+          'Dificuldades em iniciar contactos sociais',
+          'Comportamento pouco assertivo como resultado de experiências negativas',
+          'Não ser atencioso (esquecer-se de mandar postal/de enviar pêsames/de telefonar, etc.)'
+        ],
+        childExamples: [
+          'Tinha dificuldade em manter contactos sociais',
+          'Teve conflitos devido a problemas de comunicação',
+          'Tinha dificuldades em iniciar contactos sociais',
+          'Tinha comportamento pouco assertivo como resultado de experiências negativas',
+          'Tinha poucos amigos',
+          'Foi vítima de bullying',
+          'Era excluído ou não era admitido a fazer parte dos grupos',
+          'Foi bully'
+        ]
+      },
+      {
+        id: 'ctx4',
+        adultTitle: 'Tempos livres/hobbies',
+        childTitle: 'Tempos livres/hobbies',
+        adultExamples: [
+          'Não conseguir relaxar nos tempos livres',
+          'Precisar de praticar muito desporto para conseguir relaxar',
+          'Lesões resultantes da prática excessiva de desporto',
+          'Não conseguir ver um filme ou ler um livro até ao fim',
+          'Estar sempre em acção e, por isso, andar exausto',
+          'Fartar-se facilmente dos hobbies',
+          'Acidentes de viação e/ou ter a carta apreendida devido a condução imprudente',
+          'Busca de adrenalina/arriscar demais',
+          'Apreendido pela polícia/presente a tribunal',
+          'Comer compulsivamente'
+        ],
+        childExamples: [
+          'Não conseguia relaxar nos tempos livres',
+          'Precisava de praticar muito desporto para conseguir relaxar',
+          'Teve lesões resultantes da prática excessiva de desporto',
+          'Não conseguia ver um filme ou ler um livro até o fim',
+          'Estava sempre em acção e, por isso, andava exausto',
+          'Fartava-se facilmente dos hobbies',
+          'Buscava a adrenalina/arriscava demais',
+          'Foi apreendido pela polícia/presente a tribunal',
+          'Teve muitos acidentes'
+        ]
+      },
+      {
+        id: 'ctx5',
+        adultTitle: 'Autoconfiança/auto-estima',
+        childTitle: 'Autoconfiança/auto-estima',
+        adultExamples: [
+          'Inseguro devido aos comentários negativos que recebe dos outros',
+          'Baixa auto-estima devido a falhanços',
+          'Medo de falhar quando começa algo de novo',
+          'Reagir exageradamente a críticas',
+          'Perfeccionismo',
+          'Sentir-se triste, por causa dos sintomas de PHDA'
+        ],
+        childExamples: [
+          'Era inseguro devido aos comentários negativos que recebia dos outros',
+          'Tinha baixa auto-estima devido aos falhanços',
+          'Tinha medo de falhar quando começava algo novo',
+          'Reagia exageradamente a críticas',
+          'Perfeccionista'
+        ]
+      }
+    ];
+
+    /**
+     * 2. GESTÃO DE ESTADO DA APLICAÇÃO
+     */
+    const STORAGE_KEY = 'diva_2_0_clinical_state_v1';
+    let currentTab = 0;
+    let autoSuggestEnabled = true;
+
+    function createEmptyState() {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const state = {
+        adultCutoff: 4, // 4 (nota de rodapé * Kooij/Barkley) ou 6 (estrito DSM-IV)
+        patient: {
+          name: '',
+          dob: '',
+          sex: '',
+          interviewDate: todayStr,
+          interviewer: '',
+          number: ''
+        },
+        criteria: {},
+        complementA: {
+          A: { adult: '', child: '' },
+          HI: { adult: '', child: '' }
+        },
+        critB: {
+          alwaysPresent: '', // 'Sim' | 'Não'
+          onsetAge: ''
+        },
+        contexts: {},
+        dysfunctionThreshold: {
+          adult: '', // 'Sim' | 'Não'
+          child: '', // 'Sim' | 'Não'
+          adultManual: false,
+          childManual: false
+        },
+        generalNotes: '',
+        scoreSheet: {
+          chronicPattern: '', // 'Sim' | 'Não'
+          chronicManual: false,
+          otherDisorder: 'Não', // 'Não' (cumpre critério E) | 'Sim'
+          otherDisorderText: '',
+          heteroParentsName: '',
+          heteroParentsScore: 'N/A',
+          heteroPartnerName: '',
+          heteroPartnerScore: 'N/A',
+          heteroSchoolScore: 'N/A',
+          heteroExplanation: '',
+          finalDiagnosis: '',
+          diagnosisManualOverride: false
+        }
+      };
+
+      // Inicializar os 18 critérios
+      [...DIVA_CRITERIA_A, ...DIVA_CRITERIA_HI].forEach(c => {
+        state.criteria[c.id] = {
+          adultChecked: [],
+          adultOtherChecked: false,
+          adultOtherText: '',
+          adultPresent: 'Não',
+          adultManual: false,
+          childChecked: [],
+          childOtherChecked: false,
+          childOtherText: '',
+          childPresent: 'Não',
+          childManual: false
+        };
+      });
+
+      // Inicializar os 5 contextos
+      DIVA_CONTEXTS_C.forEach(ctx => {
+        state.contexts[ctx.id] = {
+          adultChecked: [],
+          adultOtherChecked: false,
+          adultOtherText: '',
+          childChecked: [],
+          childOtherChecked: false,
+          childOtherText: ''
+        };
+      });
+
+      return state;
+    }
+
+    let appState = createEmptyState();
+
+    /**
+     * 3. INICIALIZAÇÃO & RENDERIZAÇÃO DE COMPONENTES
+     */
+    window.addEventListener('DOMContentLoaded', () => {
+      loadStateFromStorage();
+      renderPart1AndPart2();
+      renderPart3Contexts();
+      syncAllUI();
+      switchTab(0);
+    });
+
+    function saveStateToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (err) {
+        console.warn('Não foi possível guardar no localStorage:', err);
+      }
+    }
+
+    function loadStateFromStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const fresh = createEmptyState();
+          appState = {
+            ...fresh,
+            ...parsed,
+            patient: { ...fresh.patient, ...(parsed.patient || {}) },
+            criteria: { ...fresh.criteria, ...(parsed.criteria || {}) },
+            complementA: { ...fresh.complementA, ...(parsed.complementA || {}) },
+            critB: { ...fresh.critB, ...(parsed.critB || {}) },
+            contexts: { ...fresh.contexts, ...(parsed.contexts || {}) },
+            dysfunctionThreshold: { ...fresh.dysfunctionThreshold, ...(parsed.dysfunctionThreshold || {}) },
+            scoreSheet: { ...fresh.scoreSheet, ...(parsed.scoreSheet || {}) }
+          };
+        }
+      } catch (err) {
+        console.warn('Erro ao ler estado guardado:', err);
+      }
+    }
+
+    /**
+     * Renderizar Cartões de Critérios para Parte 1 (A1-A9) e Parte 2 (H/I 1-9)
+     */
+    function renderPart1AndPart2() {
+      const containerA = document.getElementById('criteriaContainerA');
+      const quickNavA = document.getElementById('quickNavA');
+      containerA.innerHTML = DIVA_CRITERIA_A.map(c => buildCriterionCardHTML(c, c.id)).join('');
+      quickNavA.innerHTML = DIVA_CRITERIA_A.map(c =>
+        `<button onclick="scrollToCriterion('card_${c.id}')" id="pill_${c.id}" class="px-2.5 py-1 rounded-md text-xs font-bold border border-slate-300 bg-slate-50 text-slate-700 hover:bg-diva-light transition">${c.id}</button>`
+      ).join('');
+
+      const containerHI = document.getElementById('criteriaContainerHI');
+      const quickNavHI = document.getElementById('quickNavHI');
+      containerHI.innerHTML = DIVA_CRITERIA_HI.map(c => buildCriterionCardHTML(c, c.displayCode)).join('');
+      quickNavHI.innerHTML = DIVA_CRITERIA_HI.map(c =>
+        `<button onclick="scrollToCriterion('card_${c.id}')" id="pill_${c.id}" class="px-2.5 py-1 rounded-md text-xs font-bold border border-slate-300 bg-slate-50 text-slate-700 hover:bg-diva-light transition">${c.displayCode}</button>`
+      ).join('');
+    }
+
+    function buildCriterionCardHTML(c, badgeLabel) {
+      const adultItemsHTML = c.adultExamples.map((ex, idx) => `
+        <label class="flex items-start gap-2.5 cursor-pointer py-1 hover:bg-slate-50 rounded px-1 transition">
+          <input type="checkbox" id="${c.id}_adult_ex_${idx}" onchange="toggleCriterionExample('${c.id}', 'adult', ${idx}, this.checked)" class="diva-checkbox" />
+          <span class="text-sm text-slate-800 leading-snug">${ex}</span>
+        </label>
+      `).join('');
+
+      const childItemsHTML = c.childExamples.map((ex, idx) => `
+        <label class="flex items-start gap-2.5 cursor-pointer py-1 hover:bg-slate-50 rounded px-1 transition">
+          <input type="checkbox" id="${c.id}_child_ex_${idx}" onchange="toggleCriterionExample('${c.id}', 'child', ${idx}, this.checked)" class="diva-checkbox" />
+          <span class="text-sm text-slate-800 leading-snug">${ex}</span>
+        </label>
+      `).join('');
+
+      return `
+        <article id="card_${c.id}" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden scroll-mt-36">
+          <!-- Cabeçalho Oficial DIVA -->
+          <div class="flex items-stretch border-b border-diva-border">
+            <div class="bg-diva-dark text-white font-extrabold text-lg sm:text-xl px-5 py-4 flex items-center justify-center min-w-[72px]">
+              ${badgeLabel}
+            </div>
+            <div class="bg-diva-light flex-1 px-5 py-3.5 flex flex-col justify-center">
+              <p class="text-sm sm:text-base font-medium text-slate-900 leading-snug">
+                ${c.question} <em class="font-normal text-slate-800">${c.subQuestion}</em>
+              </p>
+            </div>
+          </div>
+
+          <!-- Duas Colunas: Idade Adulta vs Infância -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
+            <!-- COLUNA IDADE ADULTA -->
+            <div class="p-5 sm:p-6 flex flex-col justify-between space-y-4">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between pb-1 border-b border-slate-100">
+                  <h4 class="font-bold text-diva-dark text-sm sm:text-base">Exemplos na idade adulta</h4>
+                  <span id="${c.id}_adult_count_badge" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">0 selecionados</span>
+                </div>
+                <div class="space-y-1 pt-1">
+                  ${adultItemsHTML}
+                  <!-- Outros -->
+                  <div class="pt-1 space-y-2">
+                    <label class="flex items-center gap-2.5 cursor-pointer px-1">
+                      <input type="checkbox" id="${c.id}_adult_other_chk" onchange="toggleCriterionOtherCheck('${c.id}', 'adult', this.checked)" class="diva-checkbox" />
+                      <span class="text-sm text-slate-800">Outros:</span>
+                    </label>
+                    <textarea id="${c.id}_adult_other_txt" rows="2" oninput="updateCriterionOtherText('${c.id}', 'adult', this.value)" placeholder="Descrever outros exemplos na idade adulta..." class="w-full p-2.5 rounded-lg border-2 border-diva-border bg-diva-lighter/25 focus:bg-white focus:border-diva-dark focus:outline-none text-xs sm:text-sm transition"></textarea>
+                  </div>
+                </div>
+                ${c.adultFootnote ? `<p class="text-xs text-slate-600 italic pt-2">${c.adultFootnote}</p>` : ''}
+              </div>
+
+              <!-- Sintoma Presente Toggle -->
+              <div id="${c.id}_adult_present_bar" class="pt-3 border-t border-slate-200 flex items-center justify-between px-3 py-2.5 rounded-xl bg-slate-50 transition">
+                <span class="text-sm font-bold text-slate-900">Sintoma presente?</span>
+                <div class="flex items-center gap-4">
+                  <label class="inline-flex items-center gap-2 cursor-pointer font-bold text-sm">
+                    <input type="checkbox" id="${c.id}_adult_pres_sim" onchange="setCriterionPresence('${c.id}', 'adult', 'Sim', true)" class="diva-checkbox" />
+                    <span>Sim</span>
+                  </label>
+                  <span class="text-slate-400">/</span>
+                  <label class="inline-flex items-center gap-2 cursor-pointer font-bold text-sm">
+                    <input type="checkbox" id="${c.id}_adult_pres_nao" onchange="setCriterionPresence('${c.id}', 'adult', 'Não', true)" class="diva-checkbox" />
+                    <span>Não</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- COLUNA INFÂNCIA -->
+            <div class="p-5 sm:p-6 flex flex-col justify-between space-y-4">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between pb-1 border-b border-slate-100">
+                  <h4 class="font-bold text-diva-dark text-sm sm:text-base">Exemplos na infância</h4>
+                  <span id="${c.id}_child_count_badge" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">0 selecionados</span>
+                </div>
+                <div class="space-y-1 pt-1">
+                  ${childItemsHTML}
+                  <!-- Outros -->
+                  <div class="pt-1 space-y-2">
+                    <label class="flex items-center gap-2.5 cursor-pointer px-1">
+                      <input type="checkbox" id="${c.id}_child_other_chk" onchange="toggleCriterionOtherCheck('${c.id}', 'child', this.checked)" class="diva-checkbox" />
+                      <span class="text-sm text-slate-800">Outros:</span>
+                    </label>
+                    <textarea id="${c.id}_child_other_txt" rows="2" oninput="updateCriterionOtherText('${c.id}', 'child', this.value)" placeholder="Descrever outros exemplos na infância..." class="w-full p-2.5 rounded-lg border-2 border-diva-border bg-diva-lighter/25 focus:bg-white focus:border-diva-dark focus:outline-none text-xs sm:text-sm transition"></textarea>
+                  </div>
+                </div>
+                ${c.childFootnote ? `<p class="text-xs text-slate-600 italic pt-2">${c.childFootnote}</p>` : ''}
+              </div>
+
+              <!-- Sintoma Presente Toggle -->
+              <div id="${c.id}_child_present_bar" class="pt-3 border-t border-slate-200 flex items-center justify-between px-3 py-2.5 rounded-xl bg-slate-50 transition">
+                <span class="text-sm font-bold text-slate-900">Sintoma presente?</span>
+                <div class="flex items-center gap-4">
+                  <label class="inline-flex items-center gap-2 cursor-pointer font-bold text-sm">
+                    <input type="checkbox" id="${c.id}_child_pres_sim" onchange="setCriterionPresence('${c.id}', 'child', 'Sim', true)" class="diva-checkbox" />
+                    <span>Sim</span>
+                  </label>
+                  <span class="text-slate-400">/</span>
+                  <label class="inline-flex items-center gap-2 cursor-pointer font-bold text-sm">
+                    <input type="checkbox" id="${c.id}_child_pres_nao" onchange="setCriterionPresence('${c.id}', 'child', 'Não', true)" class="diva-checkbox" />
+                    <span>Não</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    /**
+     * Renderizar Parte 3 (Critério C - 5 Contextos de Vida)
+     */
+    function renderPart3Contexts() {
+      const container = document.getElementById('contextsContainerC');
+      container.innerHTML = DIVA_CONTEXTS_C.map((ctx, cIdx) => {
+        const adultHTML = ctx.adultExamples.map((ex, idx) => `
+          <label class="flex items-start gap-2.5 cursor-pointer py-1 hover:bg-slate-50 rounded px-1 transition">
+            <input type="checkbox" id="${ctx.id}_adult_ex_${idx}" onchange="toggleContextExample('${ctx.id}', 'adult', ${idx}, this.checked)" class="diva-checkbox" />
+            <span class="text-sm text-slate-800 leading-snug">${ex}</span>
+          </label>
+        `).join('');
+
+        const childHTML = ctx.childExamples.map((ex, idx) => `
+          <label class="flex items-start gap-2.5 cursor-pointer py-1 hover:bg-slate-50 rounded px-1 transition">
+            <input type="checkbox" id="${ctx.id}_child_ex_${idx}" onchange="toggleContextExample('${ctx.id}', 'child', ${idx}, this.checked)" class="diva-checkbox" />
+            <span class="text-sm text-slate-800 leading-snug">${ex}</span>
+          </label>
+        `).join('');
+
+        return `
+          <div class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
+            <!-- Contexto Idade Adulta -->
+            <div class="p-5 sm:p-6 space-y-3">
+              <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                <div>
+                  <span class="text-xs font-bold uppercase tracking-wider text-diva-dark block">Idade adulta</span>
+                  <h4 class="font-bold text-slate-900 text-base">${cIdx + 1}. ${ctx.adultTitle}</h4>
+                </div>
+                <span id="${ctx.id}_adult_badge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">Sem disfunção marcada</span>
+              </div>
+              <div class="space-y-1">
+                ${adultHTML}
+                <div class="pt-1 space-y-2">
+                  <label class="flex items-center gap-2.5 cursor-pointer px-1">
+                    <input type="checkbox" id="${ctx.id}_adult_other_chk" onchange="toggleContextOtherCheck('${ctx.id}', 'adult', this.checked)" class="diva-checkbox" />
+                    <span class="text-sm text-slate-800">Outros:</span>
+                  </label>
+                  <textarea id="${ctx.id}_adult_other_txt" rows="2" oninput="updateContextOtherText('${ctx.id}', 'adult', this.value)" placeholder="Outros indicadores de disfunção neste contexto..." class="w-full p-2.5 rounded-lg border-2 border-diva-border bg-diva-lighter/25 focus:bg-white focus:border-diva-dark focus:outline-none text-xs sm:text-sm transition"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contexto Infância -->
+            <div class="p-5 sm:p-6 space-y-3">
+              <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                <div>
+                  <span class="text-xs font-bold uppercase tracking-wider text-diva-dark block">Infância</span>
+                  <h4 class="font-bold text-slate-900 text-base">${cIdx + 1}. ${ctx.childTitle}</h4>
+                </div>
+                <span id="${ctx.id}_child_badge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">Sem disfunção marcada</span>
+              </div>
+              <div class="space-y-1">
+                ${childHTML}
+                <div class="pt-1 space-y-2">
+                  <label class="flex items-center gap-2.5 cursor-pointer px-1">
+                    <input type="checkbox" id="${ctx.id}_child_other_chk" onchange="toggleContextOtherCheck('${ctx.id}', 'child', this.checked)" class="diva-checkbox" />
+                    <span class="text-sm text-slate-800">Outros:</span>
+                  </label>
+                  <textarea id="${ctx.id}_child_other_txt" rows="2" oninput="updateContextOtherText('${ctx.id}', 'child', this.value)" placeholder="Outros indicadores de disfunção na infância..." class="w-full p-2.5 rounded-lg border-2 border-diva-border bg-diva-lighter/25 focus:bg-white focus:border-diva-dark focus:outline-none text-xs sm:text-sm transition"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /**
+     * 4. INTERAÇÕES E ATUALIZAÇÃO DE DADOS
+     */
+    function switchTab(tabIndex) {
+      currentTab = tabIndex;
+      for (let i = 0; i <= 5; i++) {
+        const panel = document.getElementById(`tabPanel-${i}`);
+        const btn = document.getElementById(`tabBtn-${i}`);
+        if (i === tabIndex) {
+          panel.classList.remove('hidden');
+          btn.className = 'tab-btn whitespace-nowrap px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold transition flex items-center gap-2 bg-diva-light text-diva-dark shadow-xs';
+        } else {
+          panel.classList.add('hidden');
+          btn.className = 'tab-btn whitespace-nowrap px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition flex items-center gap-2 text-white/80 hover:text-white hover:bg-white/10';
+        }
+      }
+      const progressPercents = [16, 32, 50, 68, 84, 100];
+      document.getElementById('overallProgressBar').style.width = `${progressPercents[tabIndex]}%`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function scrollToCriterion(elementId) {
+      const el = document.getElementById(elementId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function toggleAutoSuggest(checked) {
+      autoSuggestEnabled = checked;
+      showToast(checked ? 'Auto-sugestão de presença ativada.' : 'Auto-sugestão desativada (modo manual).');
+    }
+
+    function updatePatientField(field, value) {
+      appState.patient[field] = value;
+      saveStateToStorage();
+    }
+
+    function setPatientSex(sexValue) {
+      appState.patient.sex = appState.patient.sex === sexValue ? '' : sexValue;
+      document.getElementById('sexM').checked = appState.patient.sex === 'M';
+      document.getElementById('sexF').checked = appState.patient.sex === 'F';
+      saveStateToStorage();
+    }
+
+    function toggleCriterionExample(critId, phase, exIndex, isChecked) {
+      const cState = appState.criteria[critId];
+      const listKey = phase === 'adult' ? 'adultChecked' : 'childChecked';
+      const arr = cState[listKey];
+
+      if (isChecked) {
+        if (!arr.includes(exIndex)) arr.push(exIndex);
+      } else {
+        cState[listKey] = arr.filter(i => i !== exIndex);
+      }
+
+      if (autoSuggestEnabled) {
+        recomputeCriterionAutoPresence(critId, phase);
+      }
+      syncAllUI();
+      saveStateToStorage();
+    }
+
+    function toggleCriterionOtherCheck(critId, phase, isChecked) {
+      const cState = appState.criteria[critId];
+      if (phase === 'adult') {
+        cState.adultOtherChecked = isChecked;
+      } else {
+        cState.childOtherChecked = isChecked;
+      }
+      if (autoSuggestEnabled) {
+        recomputeCriterionAutoPresence(critId, phase);
+      }
+      syncAllUI();
+      saveStateToStorage();
+    }
+
+    function updateCriterionOtherText(critId, phase, textValue) {
+      const cState = appState.criteria[critId];
+      if (phase === 'adult') {
+        cState.adultOtherText = textValue;
+        if (textValue.trim().length > 0 && !cState.adultOtherChecked) {
+          cState.adultOtherChecked = true;
+        }
+      } else {
+        cState.childOtherText = textValue;
+        if (textValue.trim().length > 0 && !cState.childOtherChecked) {
+          cState.childOtherChecked = true;
+        }
+      }
+      if (autoSuggestEnabled) {
+        recomputeCriterionAutoPresence(critId, phase);
+      }
+      syncAllUI();
+      saveStateToStorage();
+    }
+
+    function recomputeCriterionAutoPresence(critId, phase) {
+      const cState = appState.criteria[critId];
+      if (phase === 'adult') {
+        const count = cState.adultChecked.length + (cState.adultOtherChecked ? 1 : 0);
+        cState.adultPresent = count > 0 ? 'Sim' : 'Não';
+      } else {
+        const count = cState.childChecked.length + (cState.childOtherChecked ? 1 : 0);
+        cState.childPresent = count > 0 ? 'Sim' : 'Não';
+      }
+    }
+
+    function setCriterionPresence(critId, phase, val, isManualClick = false) {
+      const cState = appState.criteria[critId];
+      if (phase === 'adult') {
+        cState.adultPresent = val;
+        if (isManualClick) cState.adultManual = true;
+      } else {
+        cState.childPresent = val;
+        if (isManualClick) cState.childManual = true;
+      }
+      syncAllUI();
+      saveStateToStorage();
+    }
+
+    function toggleSummaryTableCriterion(critId, phase, isChecked) {
+      setCriterionPresence(critId, phase, isChecked ? 'Sim' : 'Não', true);
+    }
+
+    function setComplementA(domain, phase, val) {
+      appState.complementA[domain][phase] = appState.complementA[domain][phase] === val ? '' : val;
+      syncAllUI();
+      saveStateToStorage();
+    }
+
+    function setCritB(val) {
+      appState.critB.alwaysPresent = appState.critB.alwaysPresent === val ? '' : val;
+      if (appState.critB.alwaysPresent === 'Sim' && !appState.scoreSheet.chronicManual) {
+        appState.scoreSheet.chronicPattern = 'Sim';
+      }
+      syncAllUI();
+      saveStateToStorage();
+    }
+
+    function updateCritBAge(val) {
+      appState.critB.onsetAge = val;
+      if (val && appState.critB.alwaysPresent !== 'Não') {
+        appState.critB.alwaysPresent = 'Não';
+      }
+      syncAllUI();
+      saveStateToStorage();
+    }
+
+    function toggleContextExample(ctxId, phase, exIndex, isChecked) {
+      const ctxState = appState.contexts[ctxId];
+      const listKey = phase === 'adult' ? 'adultChecked' : 'childChecked';
+      const arr = ctxState[listKey];
+
+      if (isChecked) {
+        if (!arr.includes(exIndex)) arr.push(exIndex);
+      } else {
+        ctxState[listKey] = arr.filter(i => i !== exIndex);
+      }
+
+      recomputeDysfunctionCounts();
+      syncAllUI();
+      saveStateToStorage();
+    }
+
+    function toggleContextOtherCheck(ctxId, phase, isChecked) {
+      const ctxState = appState.contexts[ctxId];
+      if (phase === 'adult') {
+        ctxState.adultOtherChecked = isChecked;
+      } else {
+        ctxState.childOtherChecked = isChecked;
+      }
+      recomputeDysfunctionCounts();
+      syncAllUI();
+      saveStateToStorage();
+    }
+
+    function updateContextOtherText(ctxId, phase, textValue) {
+      const ctxState = appState.contexts[ctxId];
+      if (phase === 'adult') {
+        ctxState.adultOtherText = textValue;
+        if (textValue.trim().length > 0 && !ctxState.adultOtherChecked) {
+          ctxState.adultOtherChecked = true;
+        }
+      } else {
+        ctxState.childOtherText = textValue;
+        if (textValue.trim().length > 0 && !ctxState.childOtherChecked) {
+          ctxState.childOtherChecked = true;
+        }
+      }
+      recomputeDysfunctionCounts();
+      syncAllUI();
+      saveStateToStorage();
+    }
+
+    function getActiveContextCounts() {
+      let adultActive = 0;
+      let childActive = 0;
+      DIVA_CONTEXTS_C.forEach(ctx => {
+        const st = appState.contexts[ctx.id];
+        const aCount = st.adultChecked.length + (st.adultOtherChecked ? 1 : 0);
+        const cCount = st.childChecked.length + (st.childOtherChecked ? 1 : 0);
+        if (aCount > 0) adultActive++;
+        if (cCount > 0) childActive++;
+      });
+      return { adultActive, childActive };
+    }
+
+    function recomputeDysfunctionCounts() {
+      const { adultActive, childActive } = getActiveContextCounts();
+      if (!appState.dysfunctionThreshold.adultManual) {
+        appState.dysfunctionThreshold.adult = adultActive >= 2 ? 'Sim' : 'Não';
+      }
+      if (!appState.dysfunctionThreshold.childManual) {
+        appState.dysfunctionThreshold.child = childActive >= 2 ? 'Sim' : 'Não';
+      }
+    }
+
+    function setDysfunctionThreshold(phase, val) {
+      if (phase === 'adult') {
+        appState.dysfunctionThreshold.adult = val;
+        appState.dysfunctionThreshold.adultManual = true;
+      } else {
+        appState.dysfunctionThreshold.child = val;
+        appState.dysfunctionThreshold.childManual = true;
+      }
+      syncAllUI();
+      saveStateToStorage();
+    }
+
+    function updateGeneralNotes(val) {
+      appState.generalNotes = val;
+      saveStateToStorage();
+    }
+
+    function setAdultCutoff(cutoffVal) {
+      appState.adultCutoff = cutoffVal;
+      syncAllUI();
+      saveStateToStorage();
+      showToast(`Ponto de corte na idade adulta definido para ≥ ${cutoffVal} sintomas.`);
+    }
+
+    function setScoreSheetField(field, val) {
+      if (field === 'chronicPattern') {
+        appState.scoreSheet.chronicPattern = val;
+        appState.scoreSheet.chronicManual = true;
+      } else if (field === 'otherDisorder') {
+        appState.scoreSheet.otherDisorder = val;
+      }
+      syncAllUI();
+      saveStateToStorage();
+    }
+
+    function updateScoreSheetText(field, val) {
+      appState.scoreSheet[field] = val;
+      if (field === 'otherDisorderText' && val.trim().length > 0) {
+        appState.scoreSheet.otherDisorder = 'Sim';
+      }
+      syncAllUI();
+      saveStateToStorage();
+    }
+
+    function setHeteroScore(group, scoreVal) {
+      if (group === 'parents') appState.scoreSheet.heteroParentsScore = scoreVal;
+      if (group === 'partner') appState.scoreSheet.heteroPartnerScore = scoreVal;
+      if (group === 'school') appState.scoreSheet.heteroSchoolScore = scoreVal;
+      syncAllUI();
+      saveStateToStorage();
+    }
+
+    function setFinalDiagnosis(diagString) {
+      appState.scoreSheet.finalDiagnosis = diagString;
+      appState.scoreSheet.diagnosisManualOverride = true;
+      syncAllUI();
+      saveStateToStorage();
+    }
+
+    function resetDiagnosisOverride() {
+      appState.scoreSheet.diagnosisManualOverride = false;
+      syncAllUI();
+      saveStateToStorage();
+      showToast('Sugestão automática de diagnóstico restaurada.');
+    }
+
+    /**
+     * 5. CÁLCULO CLÍNICO E SINCRONIZAÇÃO DE TODA A INTERFACE
+     */
+    function calculateTotalsAndDiagnosis() {
+      let adultA = 0;
+      let childA = 0;
+      DIVA_CRITERIA_A.forEach(c => {
+        if (appState.criteria[c.id].adultPresent === 'Sim') adultA++;
+        if (appState.criteria[c.id].childPresent === 'Sim') childA++;
+      });
+
+      let adultHI = 0;
+      let childHI = 0;
+      DIVA_CRITERIA_HI.forEach(c => {
+        if (appState.criteria[c.id].adultPresent === 'Sim') adultHI++;
+        if (appState.criteria[c.id].childPresent === 'Sim') childHI++;
+      });
+
+      const cutoff = appState.adultCutoff || 4;
+      const childAMet = childA >= 6;
+      const childHIMet = childHI >= 6;
+      const adultAMet = adultA >= cutoff;
+      const adultHIMet = adultHI >= cutoff;
+
+      const { adultActive, childActive } = getActiveContextCounts();
+
+      // Auto-atualizar padrão crónico se não tiver sido editado manualmente
+      if (!appState.scoreSheet.chronicManual) {
+        const hasChildhood = (childAMet || childHIMet || appState.critB.alwaysPresent === 'Sim');
+        const hasAdult = (adultAMet || adultHIMet);
+        appState.scoreSheet.chronicPattern = (hasChildhood && hasAdult) ? 'Sim' : 'Não';
+      }
+
+      // Auto-atualizar limiar de contextos C/D se não tiver sido forçado manualmente
+      if (!appState.dysfunctionThreshold.adultManual) {
+        appState.dysfunctionThreshold.adult = adultActive >= 2 ? 'Sim' : 'Não';
+      }
+      if (!appState.dysfunctionThreshold.childManual) {
+        appState.dysfunctionThreshold.child = childActive >= 2 ? 'Sim' : 'Não';
+      }
+
+      const critAMetInChildhood = childAMet || childHIMet;
+      const critAMetInAdult = adultAMet || adultHIMet;
+      const critBMet = appState.scoreSheet.chronicPattern === 'Sim';
+      const critCDMet = appState.dysfunctionThreshold.adult === 'Sim' && appState.dysfunctionThreshold.child === 'Sim';
+      const critEMet = appState.scoreSheet.otherDisorder === 'Não';
+
+      // Algoritmo de Subtipo Prevalente no Adulto (Nota de rodapé *** da Página 19)
+      let suggestedDiagnosis = 'Não';
+      let rationaleTitle = 'Critérios para PHDA não preenchidos na totalidade';
+      let rationaleDetails = [];
+
+      if (!critAMetInChildhood) {
+        rationaleDetails.push(`Infância: < 6 características em ambos os domínios (A: ${childA}/9, H/I: ${childHI}/9).`);
+      } else {
+        rationaleDetails.push(`Infância cumprida (A: ${childA}/9, H/I: ${childHI}/9).`);
+      }
+
+      if (!critAMetInAdult) {
+        rationaleDetails.push(`Idade adulta: < ${cutoff} características em ambos os domínios (A: ${adultA}/9, H/I: ${adultHI}/9).`);
+      } else {
+        rationaleDetails.push(`Idade adulta cumprida com corte ≥ ${cutoff} (A: ${adultA}/9, H/I: ${adultHI}/9).`);
+      }
+
+      if (!critBMet) {
+        rationaleDetails.push('Critério B (Padrão crónico): Não confirmado.');
+      }
+      if (!critCDMet) {
+        rationaleDetails.push(`Critérios C e D (Disfunção ≥ 2 contextos): Adulta (${appState.dysfunctionThreshold.adult || 'Não'}), Infância (${appState.dysfunctionThreshold.child || 'Não'}).`);
+      }
+      if (!critEMet) {
+        rationaleDetails.push(`Critério E: Sintomas atribuídos a outra perturbação (${appState.scoreSheet.otherDisorderText || 'especificada'}).`);
+      }
+
+      if (critAMetInChildhood && critAMetInAdult && critBMet && critCDMet && critEMet) {
+        // Prevalece o subtipo atual na idade adulta (***)
+        if (adultAMet && adultHIMet) {
+          suggestedDiagnosis = '314.01 Subtipo misto';
+          rationaleTitle = 'Diagnóstico Positivo: 314.01 Subtipo misto';
+        } else if (adultAMet && !adultHIMet) {
+          suggestedDiagnosis = '314.00 Subtipo predominantemente desatento';
+          rationaleTitle = 'Diagnóstico Positivo: 314.00 Subtipo predominantemente desatento';
+        } else if (!adultAMet && adultHIMet) {
+          suggestedDiagnosis = '314.01 Subtipo predominantemente hiperactivo/impulsivo';
+          rationaleTitle = 'Diagnóstico Positivo: 314.01 Subtipo predominantemente hiperactivo/impulsivo';
+        }
+      }
+
+      if (!appState.scoreSheet.diagnosisManualOverride) {
+        appState.scoreSheet.finalDiagnosis = suggestedDiagnosis;
+      }
+
+      return {
+        adultA,
+        childA,
+        adultHI,
+        childHI,
+        cutoff,
+        childAMet,
+        childHIMet,
+        adultAMet,
+        adultHIMet,
+        adultActive,
+        childActive,
+        suggestedDiagnosis,
+        rationaleTitle,
+        rationaleDetails
+      };
+    }
+
+    function syncAllUI() {
+      const calc = calculateTotalsAndDiagnosis();
+
+      // 1. Sincronizar Dados do Paciente
+      document.getElementById('patientName').value = appState.patient.name || '';
+      document.getElementById('patientDob').value = appState.patient.dob || '';
+      document.getElementById('sexM').checked = appState.patient.sex === 'M';
+      document.getElementById('sexF').checked = appState.patient.sex === 'F';
+      document.getElementById('interviewDate').value = appState.patient.interviewDate || '';
+      document.getElementById('interviewerName').value = appState.patient.interviewer || '';
+      document.getElementById('patientNumber').value = appState.patient.number || '';
+
+      // 2. Sincronizar Contadores do Topo e Badges das Abas
+      document.getElementById('headerScoreA').textContent = `Adulta ${calc.adultA}/9 • Infância ${calc.childA}/9`;
+      document.getElementById('headerScoreHI').textContent = `Adulta ${calc.adultHI}/9 • Infância ${calc.childHI}/9`;
+      document.getElementById('tabBadge-A').textContent = `${calc.adultA}/${calc.childA}`;
+      document.getElementById('tabBadge-HI').textContent = `${calc.adultHI}/${calc.childHI}`;
+      document.getElementById('tabBadge-C').textContent = `${calc.adultActive}/${calc.childActive}`;
+      document.getElementById('part1BannerCounter').textContent = `Adulta: ${calc.adultA}/9 • Infância: ${calc.childA}/9`;
+      document.getElementById('part2BannerCounter').textContent = `Adulta: ${calc.adultHI}/9 • Infância: ${calc.childHI}/9`;
+
+      // 3. Sincronizar Cartões dos 18 Critérios (Partes 1 e 2)
+      [...DIVA_CRITERIA_A, ...DIVA_CRITERIA_HI].forEach(c => {
+        const cState = appState.criteria[c.id];
+
+        c.adultExamples.forEach((_, idx) => {
+          const chk = document.getElementById(`${c.id}_adult_ex_${idx}`);
+          if (chk) chk.checked = cState.adultChecked.includes(idx);
+        });
+        c.childExamples.forEach((_, idx) => {
+          const chk = document.getElementById(`${c.id}_child_ex_${idx}`);
+          if (chk) chk.checked = cState.childChecked.includes(idx);
+        });
+
+        const aOtherChk = document.getElementById(`${c.id}_adult_other_chk`);
+        const aOtherTxt = document.getElementById(`${c.id}_adult_other_txt`);
+        if (aOtherChk) aOtherChk.checked = cState.adultOtherChecked;
+        if (aOtherTxt && aOtherTxt.value !== cState.adultOtherText) aOtherTxt.value = cState.adultOtherText;
+
+        const cOtherChk = document.getElementById(`${c.id}_child_other_chk`);
+        const cOtherTxt = document.getElementById(`${c.id}_child_other_txt`);
+        if (cOtherChk) cOtherChk.checked = cState.childOtherChecked;
+        if (cOtherTxt && cOtherTxt.value !== cState.childOtherText) cOtherTxt.value = cState.childOtherText;
+
+        // Badges de contagem de exemplos
+        const aExCount = cState.adultChecked.length + (cState.adultOtherChecked ? 1 : 0);
+        const cExCount = cState.childChecked.length + (cState.childOtherChecked ? 1 : 0);
+        const aBadge = document.getElementById(`${c.id}_adult_count_badge`);
+        const cBadge = document.getElementById(`${c.id}_child_count_badge`);
+        if (aBadge) {
+          aBadge.textContent = `${aExCount} ${aExCount === 1 ? 'exemplo' : 'exemplos'}`;
+          aBadge.className = aExCount > 0
+            ? 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-diva-light text-diva-dark'
+            : 'text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600';
+        }
+        if (cBadge) {
+          cBadge.textContent = `${cExCount} ${cExCount === 1 ? 'exemplo' : 'exemplos'}`;
+          cBadge.className = cExCount > 0
+            ? 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-diva-light text-diva-dark'
+            : 'text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600';
+        }
+
+        // Sintoma presente Sim / Não
+        const aSim = document.getElementById(`${c.id}_adult_pres_sim`);
+        const aNao = document.getElementById(`${c.id}_adult_pres_nao`);
+        const aBar = document.getElementById(`${c.id}_adult_present_bar`);
+        if (aSim && aNao) {
+          aSim.checked = cState.adultPresent === 'Sim';
+          aNao.checked = cState.adultPresent === 'Não';
+        }
+        if (aBar) {
+          aBar.className = cState.adultPresent === 'Sim'
+            ? 'pt-3 border-t border-diva-border flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-diva-light/60 transition'
+            : 'pt-3 border-t border-slate-200 flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-50 transition';
+        }
+
+        const cSim = document.getElementById(`${c.id}_child_pres_sim`);
+        const cNao = document.getElementById(`${c.id}_child_pres_nao`);
+        const cBar = document.getElementById(`${c.id}_child_present_bar`);
+        if (cSim && cNao) {
+          cSim.checked = cState.childPresent === 'Sim';
+          cNao.checked = cState.childPresent === 'Não';
+        }
+        if (cBar) {
+          cBar.className = cState.childPresent === 'Sim'
+            ? 'pt-3 border-t border-diva-border flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-diva-light/60 transition'
+            : 'pt-3 border-t border-slate-200 flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-50 transition';
+        }
+
+        // Pílula de navegação rápida
+        const pill = document.getElementById(`pill_${c.id}`);
+        if (pill) {
+          const bothPresent = cState.adultPresent === 'Sim' && cState.childPresent === 'Sim';
+          const onePresent = cState.adultPresent === 'Sim' || cState.childPresent === 'Sim';
+          if (bothPresent) {
+            pill.className = 'px-2.5 py-1 rounded-md text-xs font-bold border border-diva-dark bg-diva-dark text-white transition';
+          } else if (onePresent) {
+            pill.className = 'px-2.5 py-1 rounded-md text-xs font-bold border border-diva-border bg-diva-light text-diva-dark transition';
+          } else {
+            pill.className = 'px-2.5 py-1 rounded-md text-xs font-bold border border-slate-300 bg-slate-50 text-slate-700 hover:bg-diva-light transition';
+          }
+        }
+      });
+
+      // 4. Sincronizar Complemento Critério A (Partes 1 e 2)
+      document.getElementById('compA_adult_sim').checked = appState.complementA.A.adult === 'Sim';
+      document.getElementById('compA_adult_nao').checked = appState.complementA.A.adult === 'Não';
+      document.getElementById('compA_child_sim').checked = appState.complementA.A.child === 'Sim';
+      document.getElementById('compA_child_nao').checked = appState.complementA.A.child === 'Não';
+
+      document.getElementById('compHI_adult_sim').checked = appState.complementA.HI.adult === 'Sim';
+      document.getElementById('compHI_adult_nao').checked = appState.complementA.HI.adult === 'Não';
+      document.getElementById('compHI_child_sim').checked = appState.complementA.HI.child === 'Sim';
+      document.getElementById('compHI_child_nao').checked = appState.complementA.HI.child === 'Não';
+
+      // 5. Sincronizar Parte 3 (Critério B e Contextos C)
+      document.getElementById('critB_sim').checked = appState.critB.alwaysPresent === 'Sim';
+      document.getElementById('critB_nao').checked = appState.critB.alwaysPresent === 'Não';
+      document.getElementById('critB_age').value = appState.critB.onsetAge || '';
+
+      DIVA_CONTEXTS_C.forEach(ctx => {
+        const st = appState.contexts[ctx.id];
+        ctx.adultExamples.forEach((_, idx) => {
+          const chk = document.getElementById(`${ctx.id}_adult_ex_${idx}`);
+          if (chk) chk.checked = st.adultChecked.includes(idx);
+        });
+        ctx.childExamples.forEach((_, idx) => {
+          const chk = document.getElementById(`${ctx.id}_child_ex_${idx}`);
+          if (chk) chk.checked = st.childChecked.includes(idx);
+        });
+
+        const aOtherChk = document.getElementById(`${ctx.id}_adult_other_chk`);
+        const aOtherTxt = document.getElementById(`${ctx.id}_adult_other_txt`);
+        if (aOtherChk) aOtherChk.checked = st.adultOtherChecked;
+        if (aOtherTxt && aOtherTxt.value !== st.adultOtherText) aOtherTxt.value = st.adultOtherText;
+
+        const cOtherChk = document.getElementById(`${ctx.id}_child_other_chk`);
+        const cOtherTxt = document.getElementById(`${ctx.id}_child_other_txt`);
+        if (cOtherChk) cOtherChk.checked = st.childOtherChecked;
+        if (cOtherTxt && cOtherTxt.value !== st.childOtherText) cOtherTxt.value = st.childOtherText;
+
+        const aCount = st.adultChecked.length + (st.adultOtherChecked ? 1 : 0);
+        const cCount = st.childChecked.length + (st.childOtherChecked ? 1 : 0);
+        const aBadge = document.getElementById(`${ctx.id}_adult_badge`);
+        const cBadge = document.getElementById(`${ctx.id}_child_badge`);
+        if (aBadge) {
+          aBadge.textContent = aCount > 0 ? `Disfunção presente (${aCount})` : 'Sem disfunção marcada';
+          aBadge.className = aCount > 0
+            ? 'text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800'
+            : 'text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600';
+        }
+        if (cBadge) {
+          cBadge.textContent = cCount > 0 ? `Disfunção presente (${cCount})` : 'Sem disfunção marcada';
+          cBadge.className = cCount > 0
+            ? 'text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800'
+            : 'text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600';
+        }
+      });
+
+      document.getElementById('critCContextCounter').textContent = `Contextos ativos: Adulta ${calc.adultActive}/5 • Infância ${calc.childActive}/5`;
+      document.getElementById('adultContextsCountBadge').textContent = `${calc.adultActive} de 5 contextos marcados`;
+      document.getElementById('childContextsCountBadge').textContent = `${calc.childActive} de 5 contextos marcados`;
+
+      document.getElementById('dysfAdult_sim').checked = appState.dysfunctionThreshold.adult === 'Sim';
+      document.getElementById('dysfAdult_nao').checked = appState.dysfunctionThreshold.adult === 'Não';
+      document.getElementById('dysfChild_sim').checked = appState.dysfunctionThreshold.child === 'Sim';
+      document.getElementById('dysfChild_nao').checked = appState.dysfunctionThreshold.child === 'Não';
+
+      const notesEl = document.getElementById('interviewDetails');
+      if (notesEl && notesEl.value !== appState.generalNotes) {
+        notesEl.value = appState.generalNotes || '';
+      }
+
+      // 6. Sincronizar Aba 5: Resumo de Sintomas (Página 18) e Folha de Cotação (Página 19)
+      renderSummaryTablePage18(calc);
+      syncScoringSheetPage19(calc);
+    }
+
+    function renderSummaryTablePage18(calc) {
+      const tbody = document.getElementById('summaryTableBody');
+      if (!tbody) return;
+
+      const rowsA = DIVA_CRITERIA_A.map(c => {
+        const st = appState.criteria[c.id];
+        return `
+          <tr class="hover:bg-slate-50">
+            <td class="py-2.5 px-3 font-bold text-slate-900 border-r border-diva-dark/30">${c.dsmCode}</td>
+            <td class="py-2.5 px-4 text-slate-800 border-r border-diva-dark/30">${c.id}. ${c.question.replace('?', '')}</td>
+            <td class="py-2.5 px-3 text-center border-r border-diva-dark/30">
+              <input type="checkbox" ${st.adultPresent === 'Sim' ? 'checked' : ''} onchange="toggleSummaryTableCriterion('${c.id}', 'adult', this.checked)" class="diva-checkbox" />
+            </td>
+            <td class="py-2.5 px-3 text-center">
+              <input type="checkbox" ${st.childPresent === 'Sim' ? 'checked' : ''} onchange="toggleSummaryTableCriterion('${c.id}', 'child', this.checked)" class="diva-checkbox" />
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      const totalRowA = `
+        <tr class="bg-[#56B8F0] font-extrabold text-slate-900">
+          <td colspan="2" class="py-3 px-4 border-r border-diva-dark">Total de critérios de Défice de Atenção</td>
+          <td class="py-2.5 px-3 text-center border-r border-diva-dark">
+            <span class="inline-block bg-white border border-diva-dark px-3 py-1 rounded font-extrabold text-diva-dark">${calc.adultA}</span> <span class="ml-1">/ 9</span>
+          </td>
+          <td class="py-2.5 px-3 text-center">
+            <span class="inline-block bg-white border border-diva-dark px-3 py-1 rounded font-extrabold text-diva-dark">${calc.childA}</span> <span class="ml-1">/ 9</span>
+          </td>
+        </tr>
+      `;
+
+      const rowsHI = DIVA_CRITERIA_HI.map(c => {
+        const st = appState.criteria[c.id];
+        return `
+          <tr class="hover:bg-slate-50">
+            <td class="py-2.5 px-3 font-bold text-slate-900 border-r border-diva-dark/30">${c.dsmCode}</td>
+            <td class="py-2.5 px-4 text-slate-800 border-r border-diva-dark/30">${c.displayCode}. ${c.question.replace('?', '')}</td>
+            <td class="py-2.5 px-3 text-center border-r border-diva-dark/30">
+              <input type="checkbox" ${st.adultPresent === 'Sim' ? 'checked' : ''} onchange="toggleSummaryTableCriterion('${c.id}', 'adult', this.checked)" class="diva-checkbox" />
+            </td>
+            <td class="py-2.5 px-3 text-center">
+              <input type="checkbox" ${st.childPresent === 'Sim' ? 'checked' : ''} onchange="toggleSummaryTableCriterion('${c.id}', 'child', this.checked)" class="diva-checkbox" />
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      const totalRowHI = `
+        <tr class="bg-[#56B8F0] font-extrabold text-slate-900">
+          <td colspan="2" class="py-3 px-4 border-r border-diva-dark">Total de critérios de Hiperactividade/Impulsividade</td>
+          <td class="py-2.5 px-3 text-center border-r border-diva-dark">
+            <span class="inline-block bg-white border border-diva-dark px-3 py-1 rounded font-extrabold text-diva-dark">${calc.adultHI}</span> <span class="ml-1">/ 9</span>
+          </td>
+          <td class="py-2.5 px-3 text-center">
+            <span class="inline-block bg-white border border-diva-dark px-3 py-1 rounded font-extrabold text-diva-dark">${calc.childHI}</span> <span class="ml-1">/ 9</span>
+          </td>
+        </tr>
+      `;
+
+      tbody.innerHTML = rowsA + totalRowA + rowsHI + totalRowHI;
+    }
+
+    function syncScoringSheetPage19(calc) {
+      // Botões de ponto de corte na idade adulta (4 vs 6)
+      const btn4 = document.getElementById('cutoffBtn4');
+      const btn6 = document.getElementById('cutoffBtn6');
+      if (calc.cutoff === 4) {
+        btn4.className = 'px-3 py-1.5 rounded-md bg-diva-dark text-white shadow-xs transition';
+        btn6.className = 'px-3 py-1.5 rounded-md text-slate-600 hover:bg-slate-100 transition';
+        document.getElementById('labelScoringAdultA').textContent = 'total de características A é ≥ 4? (nota *)';
+        document.getElementById('labelScoringAdultHI').textContent = 'total de características H/I é ≥ 4? (nota *)';
+      } else {
+        btn6.className = 'px-3 py-1.5 rounded-md bg-diva-dark text-white shadow-xs transition';
+        btn4.className = 'px-3 py-1.5 rounded-md text-slate-600 hover:bg-slate-100 transition';
+        document.getElementById('labelScoringAdultA').textContent = 'total de características A é ≥ 6?';
+        document.getElementById('labelScoringAdultHI').textContent = 'total de características H/I é ≥ 6?';
+      }
+
+      // DSM-IV critério A
+      document.getElementById('score_childA_sim').checked = calc.childAMet;
+      document.getElementById('score_childA_nao').checked = !calc.childAMet;
+      document.getElementById('score_childHI_sim').checked = calc.childHIMet;
+      document.getElementById('score_childHI_nao').checked = !calc.childHIMet;
+
+      document.getElementById('score_adultA_sim').checked = calc.adultAMet;
+      document.getElementById('score_adultA_nao').checked = !calc.adultAMet;
+      document.getElementById('score_adultHI_sim').checked = calc.adultHIMet;
+      document.getElementById('score_adultHI_nao').checked = !calc.adultHIMet;
+
+      // DSM-IV critério B
+      document.getElementById('score_critB_sim').checked = appState.scoreSheet.chronicPattern === 'Sim';
+      document.getElementById('score_critB_nao').checked = appState.scoreSheet.chronicPattern === 'Não';
+
+      // DSM-IV critério C e D
+      document.getElementById('score_critCD_adult_sim').checked = appState.dysfunctionThreshold.adult === 'Sim';
+      document.getElementById('score_critCD_adult_nao').checked = appState.dysfunctionThreshold.adult === 'Não';
+      document.getElementById('score_critCD_child_sim').checked = appState.dysfunctionThreshold.child === 'Sim';
+      document.getElementById('score_critCD_child_nao').checked = appState.dysfunctionThreshold.child === 'Não';
+
+      // DSM-IV critério E
+      document.getElementById('score_critE_nao').checked = appState.scoreSheet.otherDisorder === 'Não';
+      document.getElementById('score_critE_sim').checked = appState.scoreSheet.otherDisorder === 'Sim';
+      const critEText = document.getElementById('score_critE_text');
+      if (critEText && critEText.value !== appState.scoreSheet.otherDisorderText) {
+        critEText.value = appState.scoreSheet.otherDisorderText || '';
+      }
+
+      // Hetero-anamnese
+      const hpName = document.getElementById('hetero_parents_text');
+      if (hpName && hpName.value !== appState.scoreSheet.heteroParentsName) hpName.value = appState.scoreSheet.heteroParentsName || '';
+      const hpartName = document.getElementById('hetero_partner_text');
+      if (hpartName && hpartName.value !== appState.scoreSheet.heteroPartnerName) hpartName.value = appState.scoreSheet.heteroPartnerName || '';
+
+      ['NA', '0', '1', '2'].forEach(code => {
+        const val = code === 'NA' ? 'N/A' : code;
+        document.getElementById(`hetero_parents_${code}`).checked = appState.scoreSheet.heteroParentsScore === val;
+        document.getElementById(`hetero_partner_${code}`).checked = appState.scoreSheet.heteroPartnerScore === val;
+        document.getElementById(`hetero_school_${code}`).checked = appState.scoreSheet.heteroSchoolScore === val;
+      });
+
+      const hExp = document.getElementById('hetero_explanation');
+      if (hExp && hExp.value !== appState.scoreSheet.heteroExplanation) {
+        hExp.value = appState.scoreSheet.heteroExplanation || '';
+      }
+
+      // Diagnóstico Final
+      const finalDiag = appState.scoreSheet.finalDiagnosis;
+      document.getElementById('diag_nao').checked = finalDiag === 'Não';
+      document.getElementById('diag_misto').checked = finalDiag === '314.01 Subtipo misto';
+      document.getElementById('diag_desatento').checked = finalDiag === '314.00 Subtipo predominantemente desatento';
+      document.getElementById('diag_hiperactivo').checked = finalDiag === '314.01 Subtipo predominantemente hiperactivo/impulsivo';
+
+      const resetOverrideBtn = document.getElementById('resetDiagOverrideBtn');
+      if (appState.scoreSheet.diagnosisManualOverride) {
+        resetOverrideBtn.classList.remove('hidden');
+      } else {
+        resetOverrideBtn.classList.add('hidden');
+      }
+
+      // Caixa de Assistente Clínico Automático
+      const box = document.getElementById('diagnosticRationaleBox');
+      const isPositive = finalDiag !== 'Não' && finalDiag !== '';
+      box.className = isPositive
+        ? 'p-3.5 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-950 text-xs space-y-1.5'
+        : 'p-3.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-950 text-xs space-y-1.5';
+
+      box.innerHTML = `
+        <div class="font-extrabold flex items-center gap-1.5">
+          <i class="fa-solid ${isPositive ? 'fa-circle-check text-emerald-600' : 'fa-circle-info text-amber-600'}"></i>
+          <span>${calc.rationaleTitle}</span>
+        </div>
+        <ul class="list-disc list-inside space-y-0.5 text-[11px] opacity-90">
+          ${calc.rationaleDetails.map(d => `<li>${d}</li>`).join('')}
+        </ul>
+        ${appState.scoreSheet.diagnosisManualOverride ? `<div class="text-[11px] font-semibold text-diva-coral pt-1">Nota: Diagnóstico ajustado manualmente pelo clínico.</div>` : ''}
+      `;
+    }
+
+    /**
+     * 6. CASO DE DEMONSTRAÇÃO E RESET
+     */
+    function openResetModal() {
+      const m = document.getElementById('resetModal');
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+    }
+
+    function closeResetModal() {
+      const m = document.getElementById('resetModal');
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+
+    function confirmResetAll() {
+      appState = createEmptyState();
+      saveStateToStorage();
+      syncAllUI();
+      closeResetModal();
+      switchTab(1);
+      showToast('Formulário limpo. Nova entrevista iniciada.');
+    }
+
+    function openDemoModal() {
+      const m = document.getElementById('demoModal');
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+    }
+
+    function closeDemoModal() {
+      const m = document.getElementById('demoModal');
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+
+    function confirmLoadDemo() {
+      const demo = createEmptyState();
+      demo.patient = {
+        name: 'Miguel Alexandre Ferreira',
+        dob: '1991-04-14',
+        sex: 'M',
+        interviewDate: new Date().toISOString().split('T')[0],
+        interviewer: 'Dra. Sofia Almeida (Psiquiatria)',
+        number: 'PROC-2026-0842'
+      };
+
+      // Marcar 7 critérios de Défice de Atenção na infância e 6 na idade adulta
+      const activeA = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A8'];
+      activeA.forEach((id, idx) => {
+        demo.criteria[id].childChecked = [0, 1];
+        demo.criteria[id].childPresent = 'Sim';
+        if (idx < 6) {
+          demo.criteria[id].adultChecked = [0, 2];
+          demo.criteria[id].adultPresent = 'Sim';
+        }
+      });
+
+      // Marcar 6 critérios de Hiperactividade/Impulsividade na infância e 5 na idade adulta
+      const activeHI = ['HI1', 'HI2', 'HI3', 'HI5', 'HI7', 'HI8'];
+      activeHI.forEach((id, idx) => {
+        demo.criteria[id].childChecked = [0, 1];
+        demo.criteria[id].childPresent = 'Sim';
+        if (idx < 5) {
+          demo.criteria[id].adultChecked = [0, 1];
+          demo.criteria[id].adultPresent = 'Sim';
+        }
+      });
+
+      demo.complementA = {
+        A: { adult: 'Sim', child: 'Sim' },
+        HI: { adult: 'Sim', child: 'Sim' }
+      };
+
+      demo.critB = {
+        alwaysPresent: 'Sim',
+        onsetAge: ''
+      };
+
+      // Marcar disfunções em 3 contextos na idade adulta e 3 na infância
+      demo.contexts.ctx1.adultChecked = [2, 4, 6];
+      demo.contexts.ctx1.childChecked = [0, 5, 7];
+      demo.contexts.ctx2.adultChecked = [3, 7];
+      demo.contexts.ctx2.childChecked = [0, 3];
+      demo.contexts.ctx5.adultChecked = [0, 1, 4];
+      demo.contexts.ctx5.childChecked = [0, 2];
+
+      demo.generalNotes = 'Paciente compareceu acompanhado pela companheira. Relata dificuldades persistentes de organização, procrastinação em tarefas administrativas e inquietação motora subjetiva desde o 1.º ciclo do ensino básico, corroboradas por cadernetas escolares antigas.';
+
+      demo.scoreSheet.otherDisorder = 'Não';
+      demo.scoreSheet.heteroParentsName = 'Mãe (via contacto telefónico)';
+      demo.scoreSheet.heteroParentsScore = '2';
+      demo.scoreSheet.heteroPartnerName = 'Companheira (Inês)';
+      demo.scoreSheet.heteroPartnerScore = '2';
+      demo.scoreSheet.heteroSchoolScore = '1';
+      demo.scoreSheet.heteroExplanation = 'Confirmação consistente pela companheira relativamente ao funcionamento atual e pela mãe/relatórios escolares quanto ao início antes dos 7 anos.';
+
+      appState = demo;
+      recomputeDysfunctionCounts();
+      saveStateToStorage();
+      syncAllUI();
+      closeDemoModal();
+      switchTab(5);
+      showToast('Caso clínico de demonstração carregado com sucesso!');
+    }
+
+    /**
+     * 7. EXPORTAÇÃO, CÓPIA E IMPRESSÃO FORMATADA
+     */
+    function generatePlainTextReport() {
+      const calc = calculateTotalsAndDiagnosis();
+      const p = appState.patient;
+      const lines = [];
+
+      lines.push('====================================================================');
+      lines.push('DIVA 2.0 — ENTREVISTA DE DIAGNÓSTICO DE PHDA EM ADULTOS (DSM-IV-TR)');
+      lines.push('====================================================================');
+      lines.push(`Nome do Paciente:      ${p.name || 'Não preenchido'}`);
+      lines.push(`Data de Nascimento:    ${p.dob || 'Não preenchida'}   |   Sexo: ${p.sex || '-'}`);
+      lines.push(`Data da Entrevista:    ${p.interviewDate || '-'}`);
+      lines.push(`Nome do Entrevistador: ${p.interviewer || 'Não preenchido'}`);
+      lines.push(`Número do Paciente:    ${p.number || '-'}`);
+      lines.push('--------------------------------------------------------------------');
+      lines.push('RESUMO DE SINTOMAS (PARTE 1 E PARTE 2)');
+      lines.push('--------------------------------------------------------------------');
+      lines.push(`• Défice de Atenção (A1):              Idade Adulta = ${calc.adultA}/9 | Infância = ${calc.childA}/9`);
+      lines.push(`• Hiperactividade/Impulsividade (A2):  Idade Adulta = ${calc.adultHI}/9 | Infância = ${calc.childHI}/9`);
+      lines.push('');
+
+      lines.push('Critérios presentes por item:');
+      DIVA_CRITERIA_A.forEach(c => {
+        const st = appState.criteria[c.id];
+        lines.push(`  [${c.dsmCode}] ${c.id}: Adulta = ${st.adultPresent} | Infância = ${st.childPresent}`);
+      });
+      DIVA_CRITERIA_HI.forEach(c => {
+        const st = appState.criteria[c.id];
+        lines.push(`  [${c.dsmCode}] ${c.displayCode}: Adulta = ${st.adultPresent} | Infância = ${st.childPresent}`);
+      });
+
+      lines.push('--------------------------------------------------------------------');
+      lines.push('FOLHA DE COTAÇÃO (PÁGINA 19)');
+      lines.push('--------------------------------------------------------------------');
+      lines.push(`• DSM-IV Critério A (Infância ≥ 6):      A = ${calc.childAMet ? 'Sim' : 'Não'} (${calc.childA}/9) | H/I = ${calc.childHIMet ? 'Sim' : 'Não'} (${calc.childHI}/9)`);
+      lines.push(`• DSM-IV Critério A (Adulta ≥ ${calc.cutoff}):        A = ${calc.adultAMet ? 'Sim' : 'Não'} (${calc.adultA}/9) | H/I = ${calc.adultHIMet ? 'Sim' : 'Não'} (${calc.adultHI}/9)`);
+      lines.push(`• DSM-IV Critério B (Início/Cronicidade):Sempre apresentou (<7 anos): ${appState.critB.alwaysPresent || '-'}${appState.critB.onsetAge ? ` (início aos ${appState.critB.onsetAge} anos)` : ''} | Padrão crónico: ${appState.scoreSheet.chronicPattern || '-'}`);
+      lines.push(`• DSM-IV Critérios C e D (≥2 contextos): Idade Adulta = ${appState.dysfunctionThreshold.adult || '-'} (${calc.adultActive}/5) | Infância = ${appState.dysfunctionThreshold.child || '-'} (${calc.childActive}/5)`);
+      lines.push(`• DSM-IV Critério E (Outra perturbação): ${appState.scoreSheet.otherDisorder}${appState.scoreSheet.otherDisorder === 'Sim' ? ` (${appState.scoreSheet.otherDisorderText})` : ' (Não são melhor explicados por outra perturbação)'}`);
+      lines.push(`• Hetero-anamnese:                       Família (${appState.scoreSheet.heteroParentsName || '-'}): ${appState.scoreSheet.heteroParentsScore} | Parceiro (${appState.scoreSheet.heteroPartnerName || '-'}): ${appState.scoreSheet.heteroPartnerScore} | Relatórios escolares: ${appState.scoreSheet.heteroSchoolScore}`);
+      if (appState.scoreSheet.heteroExplanation) {
+        lines.push(`  Explicação Hetero-anamnese: ${appState.scoreSheet.heteroExplanation}`);
+      }
+      if (appState.generalNotes) {
+        lines.push(`• Pormenores / Observações Clínicas:     ${appState.generalNotes}`);
+      }
+      lines.push('--------------------------------------------------------------------');
+      lines.push(`CONCLUSÃO DIAGNÓSTICA PHDA***: ${appState.scoreSheet.finalDiagnosis === 'Não' ? 'NÃO CUMPRE CRITÉRIOS PARA PHDA' : 'SIM — ' + appState.scoreSheet.finalDiagnosis}`);
+      lines.push('====================================================================');
+
+      return lines.join('\n');
+    }
+
+    function copyClinicalSummary() {
+      const text = generatePlainTextReport();
+      const fallback = document.getElementById('clipboardFallback');
+      fallback.value = text;
+      fallback.select();
+      fallback.setSelectionRange(0, 99999);
+      try {
+        document.execCommand('copy');
+        showToast('Resumo clínico copiado para a área de transferência!');
+      } catch (err) {
+        showToast('Não foi possível copiar automaticamente.');
+      }
+    }
+
+    function downloadMarkdownReport() {
+      const content = generatePlainTextReport();
+      const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const safeName = (appState.patient.name || 'paciente').toLowerCase().replace(/[^a-z0-9]+/g, '_');
+      a.href = url;
+      a.download = `relatorio_diva_2_0_${safeName}.md`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Relatório descarregado com sucesso!');
+    }
+
+    function exportJsonData() {
+      const blob = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const safeName = (appState.patient.name || 'entrevista').toLowerCase().replace(/[^a-z0-9]+/g, '_');
+      a.href = url;
+      a.download = `dados_diva_2_0_${safeName}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Ficheiro de dados JSON exportado.');
+    }
+
+    function importJsonData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (parsed && parsed.criteria && parsed.patient) {
+            appState = parsed;
+            saveStateToStorage();
+            syncAllUI();
+            showToast('Dados da entrevista importados com sucesso!');
+          } else {
+            showToast('Ficheiro JSON inválido para a DIVA 2.0.');
+          }
+        } catch (err) {
+          showToast('Erro ao ler o ficheiro JSON.');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function printReport(mode = 'summary') {
+      const calc = calculateTotalsAndDiagnosis();
+      const p = appState.patient;
+      const printContainer = document.getElementById('printContainer');
+
+      let fullDetailsHTML = '';
+      if (mode === 'full') {
+        const renderCritList = (list, sectionTitle) => `
+          <div class="mt-6">
+            <h3 class="text-sm font-extrabold uppercase bg-[#E04F5F] text-white px-3 py-1.5 rounded mb-3">${sectionTitle}</h3>
+            <div class="space-y-3">
+              ${list.map(c => {
+                const st = appState.criteria[c.id];
+                const aEx = c.adultExamples.filter((_, idx) => st.adultChecked.includes(idx));
+                if (st.adultOtherChecked && st.adultOtherText) aEx.push('Outros: ' + st.adultOtherText);
+                const cEx = c.childExamples.filter((_, idx) => st.childChecked.includes(idx));
+                if (st.childOtherChecked && st.childOtherText) cEx.push('Outros: ' + st.childOtherText);
+                return `
+                  <div class="border border-slate-300 rounded p-3 print-break-inside-avoid text-xs">
+                    <div class="font-bold text-[#1A428A] mb-1">${c.displayCode || c.id} (${c.dsmCode}) — ${c.question}</div>
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <div class="font-semibold">Idade Adulta — Presente: ${st.adultPresent}</div>
+                        <ul class="list-disc list-inside text-[11px] text-slate-700 mt-0.5">
+                          ${aEx.length ? aEx.map(item => `<li>${item}</li>`).join('') : '<li class="italic text-slate-400">Nenhum exemplo assinalado</li>'}
+                        </ul>
+                      </div>
+                      <div>
+                        <div class="font-semibold">Infância — Presente: ${st.childPresent}</div>
+                        <ul class="list-disc list-inside text-[11px] text-slate-700 mt-0.5">
+                          ${cEx.length ? cEx.map(item => `<li>${item}</li>`).join('') : '<li class="italic text-slate-400">Nenhum exemplo assinalado</li>'}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+
+        const renderContextsPrint = () => `
+          <div class="mt-6 print-page-break">
+            <h3 class="text-sm font-extrabold uppercase bg-[#E04F5F] text-white px-3 py-1.5 rounded mb-3">Parte 3: Contextos de Disfunção (Critério C)</h3>
+            <div class="space-y-3">
+              ${DIVA_CONTEXTS_C.map((ctx, i) => {
+                const st = appState.contexts[ctx.id];
+                const aEx = ctx.adultExamples.filter((_, idx) => st.adultChecked.includes(idx));
+                if (st.adultOtherChecked && st.adultOtherText) aEx.push('Outros: ' + st.adultOtherText);
+                const cEx = ctx.childExamples.filter((_, idx) => st.childChecked.includes(idx));
+                if (st.childOtherChecked && st.childOtherText) cEx.push('Outros: ' + st.childOtherText);
+                return `
+                  <div class="border border-slate-300 rounded p-3 print-break-inside-avoid text-xs">
+                    <div class="font-bold text-[#1A428A] mb-1">${i + 1}. ${ctx.adultTitle}</div>
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <div class="font-semibold">Idade Adulta</div>
+                        <ul class="list-disc list-inside text-[11px] text-slate-700 mt-0.5">
+                          ${aEx.length ? aEx.map(item => `<li>${item}</li>`).join('') : '<li class="italic text-slate-400">Sem itens marcados</li>'}
+                        </ul>
+                      </div>
+                      <div>
+                        <div class="font-semibold">Infância</div>
+                        <ul class="list-disc list-inside text-[11px] text-slate-700 mt-0.5">
+                          ${cEx.length ? cEx.map(item => `<li>${item}</li>`).join('') : '<li class="italic text-slate-400">Sem itens marcados</li>'}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+
+        fullDetailsHTML = renderCritList(DIVA_CRITERIA_A, 'Parte 1: Sintomas de Défice de Atenção (A1)') +
+                          renderCritList(DIVA_CRITERIA_HI, 'Parte 2: Sintomas de Hiperactividade-Impulsividade (A2)') +
+                          renderContextsPrint();
+      }
+
+      printContainer.innerHTML = `
+        <div class="space-y-5">
+          <div class="flex items-center justify-between border-b-2 border-[#1A428A] pb-3">
+            <div>
+              <h1 class="text-xl font-extrabold text-[#1A428A]">DIVA 2.0 — Entrevista de Diagnóstico de PHDA em Adultos</h1>
+              <p class="text-xs text-slate-600">Relatório Clínico e Folha de Cotação Oficial (DSM-IV-TR)</p>
+            </div>
+            <div class="text-right text-xs">
+              <div><strong>Data:</strong> ${p.interviewDate || '-'}</div>
+              <div><strong>Processo:</strong> ${p.number || '-'}</div>
+            </div>
+          </div>
+
+          <!-- Dados do Paciente -->
+          <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded border border-slate-300 text-xs">
+            <div><strong>Nome do Paciente:</strong> ${p.name || '-'}</div>
+            <div><strong>Data de Nascimento:</strong> ${p.dob || '-'} (Sexo: ${p.sex || '-'})</div>
+            <div><strong>Entrevistador:</strong> ${p.interviewer || '-'}</div>
+            <div><strong>Número do Paciente:</strong> ${p.number || '-'}</div>
+          </div>
+
+          <!-- Tabela de Resumo de Sintomas A e HI -->
+          <div class="print-break-inside-avoid">
+            <h2 class="text-sm font-extrabold uppercase bg-[#E04F5F] text-white px-3 py-1.5 rounded-t">Resumo de Sintomas A e HI (Página 18)</h2>
+            <table class="w-full text-left border-collapse border border-[#1A428A] text-[11px]">
+              <thead>
+                <tr class="bg-[#1A428A] text-white">
+                  <th class="p-1.5 border-r border-white/30 w-16">DSM-IV</th>
+                  <th class="p-1.5 border-r border-white/30">Sintoma</th>
+                  <th class="p-1.5 border-r border-white/30 w-24 text-center">Idade Adulta</th>
+                  <th class="p-1.5 w-24 text-center">Infância</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${DIVA_CRITERIA_A.map(c => {
+                  const st = appState.criteria[c.id];
+                  return `
+                    <tr class="border-t border-slate-300">
+                      <td class="p-1.5 font-bold border-r border-slate-300">${c.dsmCode}</td>
+                      <td class="p-1.5 border-r border-slate-300">${c.id}. ${c.question.replace('?', '')}</td>
+                      <td class="p-1.5 text-center font-bold border-r border-slate-300">${st.adultPresent === 'Sim' ? '✓ Sim' : 'Não'}</td>
+                      <td class="p-1.5 text-center font-bold">${st.childPresent === 'Sim' ? '✓ Sim' : 'Não'}</td>
+                    </tr>
+                  `;
+                }).join('')}
+                <tr class="bg-[#D4EFFC] font-extrabold border-t border-[#1A428A]">
+                  <td colspan="2" class="p-2 border-r border-[#1A428A]">Total de critérios de Défice de Atenção (A)</td>
+                  <td class="p-2 text-center border-r border-[#1A428A]">${calc.adultA} / 9</td>
+                  <td class="p-2 text-center">${calc.childA} / 9</td>
+                </tr>
+                ${DIVA_CRITERIA_HI.map(c => {
+                  const st = appState.criteria[c.id];
+                  return `
+                    <tr class="border-t border-slate-300">
+                      <td class="p-1.5 font-bold border-r border-slate-300">${c.dsmCode}</td>
+                      <td class="p-1.5 border-r border-slate-300">${c.displayCode}. ${c.question.replace('?', '')}</td>
+                      <td class="p-1.5 text-center font-bold border-r border-slate-300">${st.adultPresent === 'Sim' ? '✓ Sim' : 'Não'}</td>
+                      <td class="p-1.5 text-center font-bold">${st.childPresent === 'Sim' ? '✓ Sim' : 'Não'}</td>
+                    </tr>
+                  `;
+                }).join('')}
+                <tr class="bg-[#D4EFFC] font-extrabold border-t border-[#1A428A]">
+                  <td colspan="2" class="p-2 border-r border-[#1A428A]">Total de critérios de Hiperactividade/Impulsividade (H/I)</td>
+                  <td class="p-2 text-center border-r border-[#1A428A]">${calc.adultHI} / 9</td>
+                  <td class="p-2 text-center">${calc.childHI} / 9</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Folha de Cotação -->
+          <div class="print-break-inside-avoid">
+            <h2 class="text-sm font-extrabold uppercase bg-[#E04F5F] text-white px-3 py-1.5 rounded-t">Folha de Cotação (Página 19)</h2>
+            <table class="w-full text-left border-collapse border border-[#1A428A] text-xs">
+              <tbody>
+                <tr class="border-b border-[#1A428A]">
+                  <td class="p-2.5 font-bold bg-[#D4EFFC] w-36 border-r border-[#1A428A]">DSM-IV critério A</td>
+                  <td class="p-2.5 border-r border-[#1A428A]">
+                    <div><strong>Infância (≥ 6):</strong> A = ${calc.childAMet ? 'Sim' : 'Não'} (${calc.childA}/9) | H/I = ${calc.childHIMet ? 'Sim' : 'Não'} (${calc.childHI}/9)</div>
+                    <div><strong>Idade adulta* (≥ ${calc.cutoff}):</strong> A = ${calc.adultAMet ? 'Sim' : 'Não'} (${calc.adultA}/9) | H/I = ${calc.adultHIMet ? 'Sim' : 'Não'} (${calc.adultHI}/9)</div>
+                  </td>
+                </tr>
+                <tr class="border-b border-[#1A428A]">
+                  <td class="p-2.5 font-bold bg-[#D4EFFC] border-r border-[#1A428A]">DSM-IV critério B</td>
+                  <td class="p-2.5">Padrão crónico de sintomas e disfunção: <strong>${appState.scoreSheet.chronicPattern || '-'}</strong> (Início &lt; 7 anos: ${appState.critB.alwaysPresent || '-'}${appState.critB.onsetAge ? `, aos ${appState.critB.onsetAge} anos` : ''})</td>
+                </tr>
+                <tr class="border-b border-[#1A428A]">
+                  <td class="p-2.5 font-bold bg-[#D4EFFC] border-r border-[#1A428A]">DSM-IV critério C e D</td>
+                  <td class="p-2.5">Disfunção em ≥ 2 contextos: <strong>Idade adulta: ${appState.dysfunctionThreshold.adult || '-'}</strong> (${calc.adultActive}/5) | <strong>Infância: ${appState.dysfunctionThreshold.child || '-'}</strong> (${calc.childActive}/5)</td>
+                </tr>
+                <tr class="border-b border-[#1A428A]">
+                  <td class="p-2.5 font-bold bg-[#D4EFFC] border-r border-[#1A428A]">DSM-IV critério E</td>
+                  <td class="p-2.5">Melhor explicados por outra perturbação psiquiátrica: <strong>${appState.scoreSheet.otherDisorder}</strong> ${appState.scoreSheet.otherDisorder === 'Sim' ? `(${appState.scoreSheet.otherDisorderText})` : ''}</td>
+                </tr>
+                <tr class="border-b border-[#1A428A]">
+                  <td class="p-2.5 font-bold bg-[#D4EFFC] border-r border-[#1A428A]">Hetero-anamnese</td>
+                  <td class="p-2.5 space-y-1">
+                    <div>Pais/familiares (${appState.scoreSheet.heteroParentsName || '-'}): <strong>${appState.scoreSheet.heteroParentsScore}</strong> | Parceiro/outros (${appState.scoreSheet.heteroPartnerName || '-'}): <strong>${appState.scoreSheet.heteroPartnerScore}</strong> | Relatórios escolares: <strong>${appState.scoreSheet.heteroSchoolScore}</strong></div>
+                    ${appState.scoreSheet.heteroExplanation ? `<div><em>Explicação:</em> ${appState.scoreSheet.heteroExplanation}</div>` : ''}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-extrabold bg-[#D4EFFC] border-r border-[#1A428A]">Diagnóstico PHDA***</td>
+                  <td class="p-3 font-extrabold text-sm text-[#1A428A]">
+                    ${appState.scoreSheet.finalDiagnosis === 'Não' ? 'Não (Critérios de diagnóstico não cumpridos)' : 'Sim — ' + appState.scoreSheet.finalDiagnosis}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          ${appState.generalNotes ? `
+            <div class="border border-slate-300 rounded p-3 text-xs print-break-inside-avoid">
+              <strong>Quaisquer pormenores / Observações da entrevista:</strong>
+              <p class="mt-1 whitespace-pre-line">${appState.generalNotes}</p>
+            </div>
+          ` : ''}
+
+          ${fullDetailsHTML}
+        </div>
+      `;
+
+      window.print();
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastNotification');
+      const text = document.getElementById('toastMessage');
+      text.textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 2800);
+    }
+  </script>
+</body>
+</html>
